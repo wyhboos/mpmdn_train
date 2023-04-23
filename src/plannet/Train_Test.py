@@ -733,9 +733,9 @@ def Train_Eval_Cloud_input_S2D_RB_MDN_main():
 
     train_data_load_file = "../../data/train/s2d/1000env_400pt/S2D_Rigidbody_train.npy"
     # train_env_test_data_load_file = "../../../output/data/S2D/MPN_S2D_train_env_test_82k.npy"
-    new_env_test_data_load_file = "../../data/train/s2d/1000env_400pt/S2D_Rigidbody_train.npy"
+    new_env_test_data_load_file = "../../data/train/s2d/1000env_400pt/S2D_Rigidbody_test.npy"
 
-    model_name = "MDN_S2D_RB_1"
+    model_name = "MDN_S2D_RB_2"
     model_dir = "../../data/model/" + model_name + '/'
     load_checkpoint_flag = False
     checkpoint_load_file = '../../../output/model/GMPN_S2D_CLOUD_MDN_6/checkpoint_save/checkpoint_epoch_340.pt'
@@ -857,7 +857,7 @@ def Train_Eval_Cloud_input_S2D_TL_MDN_main():
     train_data_load_file = "../../data/train/s2d/1000env_400pt/S2D_Two_Link_train.npy"
     # train_env_test_data_load_file = "../../../output/data/S2D/MPN_S2D_train_env_test_82k.npy"
     new_env_test_data_load_file = "../../data/train/s2d/1000env_400pt/S2D_Two_Link_test.npy"
-    model_name = "MDN_S2D_TL_1"
+    model_name = "MDN_S2D_TL_2"
     model_dir = "../../data/model/" + model_name + '/'
     load_checkpoint_flag = False
     checkpoint_load_file = '../../../output/model/GMPN_S2D_CLOUD_MDN_6/checkpoint_save/checkpoint_epoch_340.pt'
@@ -977,9 +977,9 @@ def Train_Eval_Cloud_input_S2D_RB_MPN_main():
 
     train_data_load_file = "../../data/train/s2d/1000env_400pt/S2D_Rigidbody_train.npy"
     # train_env_test_data_load_file = "../../../output/data/S2D/MPN_S2D_train_env_test_82k.npy"
-    new_env_test_data_load_file = "../../data/train/s2d/1000env_400pt/S2D_Rigidbody_train.npy"
+    new_env_test_data_load_file = "../../data/train/s2d/1000env_400pt/S2D_Rigidbody_test.npy"
 
-    model_name = "MPN_S2D_RB_1"
+    model_name = "MPN_S2D_RB_2"
     model_dir = "../../data/model/" + model_name + '/'
     load_checkpoint_flag = False
     checkpoint_load_file = '../../../output/model/GMPN_S2D_CLOUD_MDN_6/checkpoint_save/checkpoint_epoch_340.pt'
@@ -1101,7 +1101,7 @@ def Train_Eval_Cloud_input_S2D_TL_MPN_main():
     # train_env_test_data_load_file = "../../../output/data/S2D/MPN_S2D_train_env_test_82k.npy"
     new_env_test_data_load_file = "../../data/train/s2d/1000env_400pt/S2D_Two_Link_test.npy"
 
-    model_name = "MPN_S2D_TL_1"
+    model_name = "MPN_S2D_TL_2"
     model_dir = "../../data/model/" + model_name + '/'
     load_checkpoint_flag = False
     checkpoint_load_file = '../../../output/model/GMPN_S2D_CLOUD_MDN_6/checkpoint_save/checkpoint_epoch_340.pt'
@@ -1217,4 +1217,4 @@ if __name__ == '__main__':
     # Train_Eval_Cloud_input_S2D_RB_MDN_main()
     # Train_Eval_Cloud_input_S2D_TL_MDN_main()
     # Train_Eval_Cloud_input_S2D_RB_MPN_main()
-    # Train_Eval_Cloud_input_S2D_TL_MPN_main()
+    Train_Eval_Cloud_input_S2D_TL_MPN_main()
