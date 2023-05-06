@@ -5,6 +5,8 @@ import os
 import torch
 import cv2
 import matplotlib.pyplot as plt
+
+
 def vis_loss(save_fig_dir, train_loss, test_loss, local_range=None):
     train_loss_file = save_fig_dir + "_train.png"
     train_loss_local_file = save_fig_dir + "_train_local.png"
@@ -31,9 +33,15 @@ def vis_loss(save_fig_dir, train_loss, test_loss, local_range=None):
     plt.close('all')
 
 
-def plot_env_scatter(save_fig_path, env_cloud):
-    env_cloud = env_cloud.reshape(-1, 2)
-    fig = plt.figure(figsize=(10, 10))
-    plt.scatter(env_cloud[:, 0], env_cloud[:, 1], s=0.5)
-    plt.savefig(save_fig_path+'.png')
+def plot_env_scatter(save_fig_path, env_cloud, dimension=2):
+    if dimension == 2:
+        env_cloud = env_cloud.reshape(-1, 2)
+        fig = plt.figure(figsize=(10, 10))
+        plt.scatter(env_cloud[:, 0], env_cloud[:, 1], s=0.5)
+    if dimension == 3:
+        env_cloud = env_cloud.reshape(-1, 3)
+        fig = plt.figure(figsize=(10, 10))
+        ax = fig.add_subplot(111, projection='3d')
+        ax.scatter(env_cloud[:, 0], env_cloud[:, 1], env_cloud[:, 2], s=0.5)
+    plt.savefig(save_fig_path + '.png')
     plt.close('all')

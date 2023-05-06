@@ -896,7 +896,7 @@ class GMPN_S2D_CLOUD_MDN_Pnet(nn.Module):
         self.layer_alpha_softmax = nn.Softmax(dim=1)
 
         self.layer_sigma = nn.Linear(32, mixture_num)
-        self.layer_sigma_activate = nn.ELU(alpha=1)
+        self.layer_sigma_activate = nn.ELU(alpha=1.0)
 
 
         self.layer_mean = nn.Linear(32, mixture_num * output_size)

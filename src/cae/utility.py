@@ -84,19 +84,19 @@ def encode_obs_main_ompl():
 
 # cat 10 part of paths
 def cat_paths():
-    file = "../../data/train/s2d/1000env_400pt/S2D_Rigidbody_Path_"
+    file = "../../data/train/s2d/1000env_400pt/S2D_Three_Link_Path_"
     path_r = []
     for i in range(10):
         file_i = np.load(file+str(i)+".npy", allow_pickle=True)
         path_r += list(file_i)
-    np.save("../../data/train/s2d/1000env_400pt/S2D_Rigidbody_Path_all", np.array(path_r))
+    np.save("../../data/train/s2d/1000env_400pt/S2D_Three_Link_Path_all", np.array(path_r))
 
-    file = "../../data/train/s2d/1000env_400pt/S2D_Two_Link_Path_"
-    path_r = []
-    for i in range(10):
-        file_i = np.load(file+str(i)+".npy", allow_pickle=True)
-        path_r += list(file_i)
-    np.save("../../data/train/s2d/1000env_400pt/S2D_Two_Link_Path_all", np.array(path_r))
+    # file = "../../data/train/s2d/1000env_400pt/S2D_Two_Link_Path_"
+    # path_r = []
+    # for i in range(10):
+    #     file_i = np.load(file+str(i)+".npy", allow_pickle=True)
+    #     path_r += list(file_i)
+    # np.save("../../data/train/s2d/1000env_400pt/S2D_Two_Link_Path_all", np.array(path_r))
 
 def encode_s2d_cloud_to_latent():
     envs = np.load("../../data/train/s2d/obs_cloud_30000.npy", allow_pickle=True)
@@ -114,7 +114,7 @@ def encode_s2d_cloud_to_latent():
     np.save("../../data/train/s2d/s2d_env_latent_30000", env_latent)
 
 def obtain_train_eval_data():
-    paths = np.load("../../data/train/s2d/1000env_400pt/S2D_Two_Link_Path_all.npy", allow_pickle=True)
+    paths = np.load("../../data/train/s2d/1000env_400pt/S2D_Three_Link_Path_all.npy", allow_pickle=True)
     env_latent = np.load("../../data/train/s2d/s2d_env_latent_30000.npy", allow_pickle=True)
     train_data = []
     train_data_env = []
@@ -177,8 +177,8 @@ def obtain_train_eval_data():
     print(test_data.shape)
     np.random.shuffle(test_data)
     np.random.shuffle(train_data)
-    np.save("../../data/train/s2d/1000env_400pt/S2D_Two_Link_train.npy", train_data)
-    np.save("../../data/train/s2d/1000env_400pt/S2D_Two_Link_test.npy", test_data)
+    np.save("../../data/train/s2d/1000env_400pt/S2D_Three_Link_train.npy", train_data)
+    np.save("../../data/train/s2d/1000env_400pt/S2D_Three_Link_test.npy", test_data)
 
 if __name__ == '__main__':
     # cat_paths()
