@@ -110,3 +110,30 @@ class GMPNDataset_S2D_ThreeL(Dataset):
 
     def __getitem__(self, item):
         return self.x_env[item], self.x_cur_pos[item], self.x_goal_pos[item], self.y[item], self.index[item]
+
+
+class GMPNDataset_Arm(Dataset):
+    """
+    x_env:input env info
+    x_cur_pos:input current position
+    x_goal_pos:input goal position
+    y:output next position
+    """
+
+    def __init__(self, data_file, env_info_length, data_len=None):
+        data = np.load(data_file, allow_pickle=True)
+        data = np.array(data, dtype=np.float32)
+        if data_len is not None:
+            data = data[:data_len, :]
+        print("Data shape is:", data.shape)
+        self.x_env = data[:, :env_info_length]
+        self.x_cur_pos = data[:, env_info_length:env_info_length + 7]
+        self.x_goal_pos = data[:, env_info_length + 7:env_info_length + 14]
+        self.y = data[:, env_info_length + 14:env_info_length + 21]
+        self.index = data[:, env_info_length + 21:env_info_length + 22]
+
+    def __len__(self):
+        return len(self.y)
+
+    def __getitem__(self, item):
+        return self.x_env[item], self.x_cur_pos[item], self.x_goal_pos[item], self.y[item], self.index[item]

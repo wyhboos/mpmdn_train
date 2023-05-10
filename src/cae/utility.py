@@ -114,8 +114,17 @@ def encode_s2d_cloud_to_latent():
     np.save("../../data/train/s2d/s2d_env_latent_30000", env_latent)
 
 def obtain_train_eval_data():
-    paths = np.load("../../data/train/s2d/1000env_400pt/S2D_Three_Link_Path_all.npy", allow_pickle=True)
+    """
+    Arm data only consists of one env with 50000 paths
+    :return:
+    """
+    # paths = np.load("../../data/train/s2d/1000env_400pt/S2D_Three_Link_Path_all.npy", allow_pickle=True)
+    paths = np.load("../../data/train/panda_arm/pathpart_49999.npy", allow_pickle=True)
+    paths = [paths]
+
+    # paths = np.load("../../data/train/s2d/1000env_400pt/S2D_Three_Link_Path_all.npy", allow_pickle=True)
     env_latent = np.load("../../data/train/s2d/s2d_env_latent_30000.npy", allow_pickle=True)
+    env_latent = np.ones((1, 28))
     train_data = []
     train_data_env = []
     train_data_current = []
@@ -129,21 +138,21 @@ def obtain_train_eval_data():
     test_data_target = []
     test_data_next = []
     test_env_index = []
-    for i in range(1000):
+    for i in range(1):
         # print("i", i)
         env_latent_i = env_latent[i, :]
         env_latent_i = env_latent_i.reshape(28)
         env_i_paths = paths[i]
         for j in range(len(env_i_paths)):
-            print("i,j", i, j)
             env_i_path_j = env_i_paths[j]
             # l = env_i_path_j.shape[0]
             l = len(env_i_path_j)
+            print("i,j,l", i, j, l)
             for k in range(l - 1):
                 target = env_i_path_j[l - 1]
                 current = env_i_path_j[k]
                 next = env_i_path_j[k + 1]
-                if i < 900:
+                if i < 40000:
                     train_data_env.append(env_latent_i)
                     train_data_current.append(current)
                     train_data_target.append(target)
@@ -177,10 +186,19 @@ def obtain_train_eval_data():
     print(test_data.shape)
     np.random.shuffle(test_data)
     np.random.shuffle(train_data)
-    np.save("../../data/train/s2d/1000env_400pt/S2D_Three_Link_train.npy", train_data)
-    np.save("../../data/train/s2d/1000env_400pt/S2D_Three_Link_test.npy", test_data)
+    np.save("../../data/train/panda_arm/arm_train.npy", train_data)
+    np.save("../../data/train/panda_arm/arm_test.npy", test_data)
+
+def divide_arm_data():
+    train = np.load("../../data/train/panda_arm/arm_train.npy")
+    test = np.load("../../data/train/panda_arm/arm_test.npy")
+    l_train = train.shape[0]
+    l_test = test.shape[0]
+    np.save("../../data/train/panda_arm/arm_train_s.npy", train[:int(0.1 * l_train), :])
+    np.save("../../data/train/panda_arm/arm_test_s.npy", train[:int(0.1 * l_test), :])
 
 if __name__ == '__main__':
     # cat_paths()
     # encode_s2d_cloud_to_latent()
-    obtain_train_eval_data()
+    # obtain_train_eval_data()
+    divide_arm_data()

@@ -47,7 +47,6 @@ def get_vertex_3D(obs):
     # print(obs_rec.shape)
     return obs_rec
 
-
 def load_3D_cloud_save():
     obs_path = "I:/Work/MPNdata/r-3d/dataset2/obs_cloud/"
     save_file = "../data/train/c3d/c3d_obs_cloud_50000.npy"
@@ -65,7 +64,6 @@ def load_3D_cloud_save():
     print(obs_cloud_3d.shape)
     np.save(save_file, obs_cloud_3d)
 
-
 def save_3D_obs_rec():
     obs_rec = []
     obs_rec_save_file = "../data/train/c3d/c3d_obs_rec_50000.npy"
@@ -80,7 +78,6 @@ def save_3D_obs_rec():
     obs_rec = np.array(obs_rec)
     print(obs_rec.shape)
     np.save(obs_rec_save_file, obs_rec)
-
 
 def load_3D_point_path_save():
     path_path = "I:/Work/MPNdata/r-3d/dataset2/"
@@ -98,7 +95,6 @@ def load_3D_point_path_save():
             path_env.append(p)
         path_all.append(path_env)
     np.save(save_file, np.array(path_all, dtype="object"))
-
 
 # def load_3D_obs_rec_save():
 #     obs_location_file = "I:/Work/MPNdata/r-3d/dataset2/obs.dat"
@@ -191,7 +187,6 @@ def get_libtorch_model():
     # # for i in o_mpn:
     # #     print(i.shape)
     sm_mpn.save("../data/model/models/MPN_S2D_TL_2_ckp_380.pt")
-
 
 def divide_s2d_cloud():
     cloud_file = "../data/train/s2d/obs_cloud_30000.npy"
