@@ -139,12 +139,12 @@ def Train_Eval_CAE_main():
     epoch_start = 0
     epoch_end = 50000
 
-    train_data_load_file = "../../../output/data/envs_for_global_lidar_info/cloud_edge_1400_train_MPN_test.npy"
-    train_data_load_file = "../../../output/data/S2D/obs_cloud_30000.npy"
-    # test_data_load_file = "../../../output/data/envs_for_global_lidar_info/cloud_edge_750_test_0.2k.npy"
+    # train_data_load_file = "../../../output/data/envs_for_global_lidar_info/cloud_edge_1400_train_MPN_test.npy"
+    train_data_load_file = "../../data/train/s2d/obs_cloud_30000_rd_train.npy"
+    test_data_load_file = "../../data/train/s2d/obs_cloud_30000_rd_test.npy"
 
-    model_name = "Autoencoder_CAE_edge_sca_1400_MPN_S2D_1"
-    model_dir = '../../../output/model/Autoencoder/' + model_name + "/"
+    model_name = "CAE_S2D_RD_1"
+    model_dir = "../../data/model/" + model_name + "/"
     load_checkpoint_flag = False
     checkpoint_load_file = '../../../output/model/Autoencoder/Autoencoder_CAE_edge_sca_1400_MPN_2/checkpoint_save/checkpoint_epoch_9000.pt'
     created_dir(model_dir)
@@ -159,26 +159,25 @@ def Train_Eval_CAE_main():
     loss_save_dir = model_dir + 'loss_save/'
     created_dir(loss_save_dir)
 
-    train_batch_size = 128
-    test_batch_size = 64
+    train_batch_size = 512
+    test_batch_size = 512
     train_data_vis_cnt = 20
-    test_data_vis_cnt = 1
+    test_data_vis_cnt = 20
 
-    checkpoint_save_interval = 100
-    vis_fig_save_interval = 50
+    checkpoint_save_interval = 500
+    vis_fig_save_interval = 200
 
     # For tensorboard vis, the dir can not be too long!
-    tensorboard_dir = '../../../output/visualizations/tensorboard/' + model_name + '/exp1'
+    tensorboard_dir = model_dir + '/exp1'
     writer = SummaryWriter(tensorboard_dir)
 
     # load dataset
     print("Start load dataset!")
-    train_dataset = CAE_cloud_Dataset(data_file=train_data_load_file, data_len=29900)
-    # test_dataset = CAE_cloud_Dataset(data_file=test_data_load_file, data_clx=encoder_input_size, data_len=200)
+    train_dataset = CAE_cloud_Dataset(data_file=train_data_load_file)
+    test_dataset = CAE_cloud_Dataset(data_file=test_data_load_file)
 
     train_vis_dataset = CAE_cloud_Dataset(data_file=train_data_load_file, data_len=train_data_vis_cnt)
-    # test_vis_dataset = CAE_cloud_Dataset(data_file=test_data_load_file, data_clx=encoder_input_size,
-    #                                      data_len=test_data_vis_cnt)
+    test_vis_dataset = CAE_cloud_Dataset(data_file=test_data_load_file, data_len=test_data_vis_cnt)
     print('Load dataset suc!')
 
     # load or create model and optimizer (checkpoint)
@@ -212,7 +211,7 @@ def Train_Eval_CAE_main():
     train_loss_all = []
     test_loss_all = []
     train_data_size = len(train_dataset)
-    # test_data_size = len(test_dataset)
+    test_data_size = len(test_dataset)
     for epoch in range(epoch_start + 1, epoch_end + 1):
         print("---------Epoch--", epoch, "-------")
         # Train loop
@@ -224,16 +223,16 @@ def Train_Eval_CAE_main():
         train_loss_all.append(train_loss_i_mean)
 
         # Eval loop
-        # test_loss_i = Test_loop_CAE(model_encoder=model_encoder, model_decoder=model_decoder,
-        #                             criterion=criterion, test_dataset=test_dataset,
-        #                             batch_size=test_batch_size, device=device)
-        # test_loss_i_mean = float(test_loss_i.data) * test_batch_size / test_data_size
-        # print('Test loss is,', test_loss_i_mean)
-        # test_loss_all.append(test_loss_i_mean)
+        test_loss_i = Test_loop_CAE(model_encoder=model_encoder, model_decoder=model_decoder,
+                                    criterion=criterion, test_dataset=test_dataset,
+                                    batch_size=test_batch_size, device=device)
+        test_loss_i_mean = float(test_loss_i.data) * test_batch_size / test_data_size
+        print('Test loss is,', test_loss_i_mean)
+        test_loss_all.append(test_loss_i_mean)
 
         writer.add_scalars('loss', {
             'train': train_loss_i_mean,
-            # 'test': test_loss_i_mean,
+            'test': test_loss_i_mean,
         }, epoch)
 
         # Save checkpoint and loss
@@ -265,10 +264,10 @@ def Train_Eval_CAE_main():
                                             vis_dataset=train_vis_dataset, save_fig_path=train_vis_fig_save_dir,
                                             device=device, epoch=epoch, loss_gate=10, epoch_gate=1000)
             # vis test dataset
-            # vis_output_for_edge_cloud_input(model_encoder=model_encoder, model_decoder=model_decoder,
-            #                                 criterion=criterion,
-            #                                 vis_dataset=test_vis_dataset, save_fig_path=test_vis_fig_save_dir,
-            #                                 device=device, epoch=epoch, loss_gate=10, epoch_gate=1000)
+            vis_output_for_edge_cloud_input(model_encoder=model_encoder, model_decoder=model_decoder,
+                                            criterion=criterion,
+                                            vis_dataset=test_vis_dataset, save_fig_path=test_vis_fig_save_dir,
+                                            device=device, epoch=epoch, loss_gate=10, epoch_gate=1000)
 
 def Train_Eval_CAE_main_C3D():
     # parm set
@@ -288,7 +287,7 @@ def Train_Eval_CAE_main_C3D():
 
     # test_data_load_file = "../../../output/data/envs_for_global_lidar_info/cloud_edge_750_test_0.2k.npy"
 
-    model_name = "CAE_C3D_6000t28_1"
+    model_name = "CAE_C3D_6000t28_test"
     model_dir = "../../data/model/" + model_name + "/"
     load_checkpoint_flag = False
     checkpoint_load_file = '../../../output/model/Autoencoder/Autoencoder_CAE_edge_sca_1400_MPN_2/checkpoint_save/checkpoint_epoch_9000.pt'
@@ -415,5 +414,6 @@ def Train_Eval_CAE_main_C3D():
                                             device=device, epoch=epoch, loss_gate=10, epoch_gate=1000, dimension=3)
 
 if __name__ == '__main__':
-    Train_Eval_CAE_main_C3D()
+    Train_Eval_CAE_main()
+    # Train_Eval_CAE_main_C3D()
     pass

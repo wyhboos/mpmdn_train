@@ -32,6 +32,7 @@ class GMPNDataset(Dataset):
     def __getitem__(self, item):
         return self.x_env[item], self.x_cur_pos[item], self.x_goal_pos[item], self.y[item], self.index[item]
 
+
 class GMPNDataset_S2D_RB(Dataset):
     """
     x_env:input env info
@@ -57,6 +58,7 @@ class GMPNDataset_S2D_RB(Dataset):
 
     def __getitem__(self, item):
         return self.x_env[item], self.x_cur_pos[item], self.x_goal_pos[item], self.y[item], self.index[item]
+
 
 class GMPNDataset_S2D_TL(Dataset):
     """
@@ -93,7 +95,8 @@ class GMPNDataset_S2D_ThreeL(Dataset):
     y:output next position
     """
 
-    def __init__(self, data_file, env_info_length, data_len=None):
+    def __init__(self, data_file, env_info_length, data_len=None, use_env=True):
+        self.use_env = use_env
         data = np.load(data_file, allow_pickle=True)
         data = np.array(data, dtype=np.float32)
         if data_len is not None:
@@ -109,7 +112,10 @@ class GMPNDataset_S2D_ThreeL(Dataset):
         return len(self.y)
 
     def __getitem__(self, item):
-        return self.x_env[item], self.x_cur_pos[item], self.x_goal_pos[item], self.y[item], self.index[item]
+        if self.use_env:
+            return self.x_env[item], self.x_cur_pos[item], self.x_goal_pos[item], self.y[item], self.index[item]
+        else:
+            return self.x_cur_pos[item], self.x_goal_pos[item], self.y[item], self.index[item]
 
 
 class GMPNDataset_Arm(Dataset):
@@ -137,3 +143,19 @@ class GMPNDataset_Arm(Dataset):
 
     def __getitem__(self, item):
         return self.x_env[item], self.x_cur_pos[item], self.x_goal_pos[item], self.y[item], self.index[item]
+
+
+class CloudDataset(Dataset):
+    def __init__(self, data_file, data_len=None):
+        data = np.load(data_file, allow_pickle=True)
+        data = np.array(data, dtype=np.float32)
+        if data_len is not None:
+            data = data[:data_len, :]
+        print("Data shape is:", data.shape)
+        self.cloud = data
+
+    def __len__(self):
+        return self.cloud.shape[0]
+
+    def __getitem__(self, item):
+        return self.cloud[item, :, :]

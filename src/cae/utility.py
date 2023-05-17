@@ -119,7 +119,7 @@ def obtain_train_eval_data():
     :return:
     """
     # paths = np.load("../../data/train/s2d/1000env_400pt/S2D_Three_Link_Path_all.npy", allow_pickle=True)
-    paths = np.load("../../data/train/panda_arm/pathpart_49999.npy", allow_pickle=True)
+    paths = np.load("../../data/train/panda_arm/path_usr_part_49999.npy", allow_pickle=True)
     paths = [paths]
 
     # paths = np.load("../../data/train/s2d/1000env_400pt/S2D_Three_Link_Path_all.npy", allow_pickle=True)
@@ -152,7 +152,7 @@ def obtain_train_eval_data():
                 target = env_i_path_j[l - 1]
                 current = env_i_path_j[k]
                 next = env_i_path_j[k + 1]
-                if i < 40000:
+                if j < 40000:
                     train_data_env.append(env_latent_i)
                     train_data_current.append(current)
                     train_data_target.append(target)
@@ -186,8 +186,8 @@ def obtain_train_eval_data():
     print(test_data.shape)
     np.random.shuffle(test_data)
     np.random.shuffle(train_data)
-    np.save("../../data/train/panda_arm/arm_train.npy", train_data)
-    np.save("../../data/train/panda_arm/arm_test.npy", test_data)
+    np.save("../../data/train/panda_arm/arm_train_new.npy", train_data)
+    np.save("../../data/train/panda_arm/arm_test_new.npy", test_data)
 
 def divide_arm_data():
     train = np.load("../../data/train/panda_arm/arm_train.npy")
@@ -200,5 +200,5 @@ def divide_arm_data():
 if __name__ == '__main__':
     # cat_paths()
     # encode_s2d_cloud_to_latent()
-    # obtain_train_eval_data()
-    divide_arm_data()
+    obtain_train_eval_data()
+    # divide_arm_data()

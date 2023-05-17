@@ -4,6 +4,7 @@ from torch.utils.data import DataLoader
 from Data_loader import GMPNDataset, GMPNDataset_S2D_RB, GMPNDataset_S2D_TL, GMPNDataset_S2D_ThreeL, GMPNDataset_Arm
 from Motion_model import GMPN_REC_MDN_1, GMPN_EDGE_CLOUD_MDN_1, GMPN_S2D_CLOUD_MDN_Pnet, S2D_MDN_Pnet
 from Data_visualization import plot_output_info_for_global, vis_loss, plot_output_info_for_global_MPN_Reg
+from src.cae.CAE_model import PtNet
 import torch
 import tqdm
 import numpy as np
@@ -42,6 +43,39 @@ def Train_loop_mdn(model, optimizer, train_dataset, batch_size, device):
     return train_loss
 
 
+def Train_loop_mdn_Joint_train(Enet, Pnet, optimizer, train_dataset, cloud_data, batch_size, device):
+    Enet.train()
+    Pnet.train()
+    if device == 'cuda':
+        Enet.cuda()
+        Pnet.cuda()
+    else:
+        Enet.cpu()
+        Pnet.cpu()
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    train_pbar = tqdm.tqdm(train_loader, position=0, leave=True)
+    train_loss = 0
+    for x_cur_pos, x_goal_pos, y, index in train_pbar:
+        # prepare cloud data
+        # print(index.shape)
+        i = int(index[0])
+        l = index.shape[0]
+        x_cloud = torch.from_numpy(cloud_data[i:i+1, :, :]).expand(l, 2, 1400)
+        # x_cloud_ = torch.clone(x_cloud_)
+        optimizer.zero_grad()
+        x_cloud, x_cur_pos, x_goal_pos, y = x_cloud.to(device), x_cur_pos.to(device), x_goal_pos.to(device), y.to(
+            device)
+        x_env = Enet(x_cloud)
+        alpha, sigma, mean = Pnet(x_env, x_cur_pos, x_goal_pos)
+        loss, NLL_loss, sigma_loss = Pnet.MDN_loss(alpha, sigma, mean, output_size=2, target=y)
+        train_loss += loss.data
+        loss.backward()
+        # total_norm = torch.nn.utils.clip_grad_norm_(parameters=model.parameters(), max_norm=0.1, norm_type=2)
+        optimizer.step()
+        optimizer.zero_grad()
+    return train_loss
+
+
 def Train_loop_mpn(model, optimizer, train_dataset, batch_size, device, criterion):
     model.train()
     if device == 'cuda':
@@ -56,6 +90,36 @@ def Train_loop_mpn(model, optimizer, train_dataset, batch_size, device, criterio
         x_env, x_cur_pos, x_goal_pos, y = x_env.to(device), x_cur_pos.to(device), x_goal_pos.to(device), y.to(
             device)
         pre_next = model(x_env, x_cur_pos, x_goal_pos)
+        loss = criterion(pre_next, y)
+        train_loss += loss.data
+        loss.backward()
+        # total_norm = torch.nn.utils.clip_grad_norm_(parameters=model.parameters(), max_norm=0.1, norm_type=2)
+        optimizer.step()
+        optimizer.zero_grad()
+    return train_loss
+
+
+def Train_loop_mpn_Joint_train(Enet, Pnet, optimizer, train_dataset, cloud_data, batch_size, device, criterion):
+    Enet.train()
+    Pnet.train()
+    if device == 'cuda':
+        Enet.cuda()
+        Pnet.cuda()
+    else:
+        Enet.cpu()
+        Pnet.cpu()
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    train_pbar = tqdm.tqdm(train_loader, position=0, leave=True)
+    train_loss = 0
+    for x_cur_pos, x_goal_pos, y, index in train_pbar:
+        i = int(index[0])
+        l = index.shape[0]
+        x_cloud = torch.from_numpy(cloud_data[i:i+1, :, :]).expand(l, 2, 1400)
+        optimizer.zero_grad()
+        x_cloud, x_cur_pos, x_goal_pos, y = x_cloud.to(device), x_cur_pos.to(device), x_goal_pos.to(device), y.to(
+            device)
+        x_env = Enet(x_cloud)
+        pre_next = Pnet(x_env, x_cur_pos, x_goal_pos)
         loss = criterion(pre_next, y)
         train_loss += loss.data
         loss.backward()
@@ -83,6 +147,32 @@ def test_loop_mdn(model, test_dataset, batch_size, device):
     return test_loss
 
 
+def test_loop_mdn_Joint_test(Enet, Pnet, test_dataset, cloud_data, batch_size, device):
+    Enet.eval()
+    Pnet.eval()
+    if device == 'cuda':
+        Enet.cuda()
+        Pnet.cuda()
+    else:
+        Enet.cpu()
+        Pnet.cpu()
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
+    test_loss = 0
+    with torch.no_grad():
+        for x_cur_pos, x_goal_pos, y, index in test_loader:
+            i = int(index[0])
+            l = index.shape[0]
+            x_cloud = torch.from_numpy(cloud_data[i:i + 1, :, :]).expand(l, 2, 1400)
+            # x_cloud = torch.clone(x_cloud)
+            x_cloud, x_cur_pos, x_goal_pos, y = x_cloud.to(device), x_cur_pos.to(device), x_goal_pos.to(device), y.to(
+                device)
+            x_env = Enet(x_cloud)
+            alpha, sigma, mean = Pnet(x_env, x_cur_pos, x_goal_pos)
+            loss, NLL_loss, sigma_loss = Pnet.MDN_loss(alpha, sigma, mean, output_size=2, target=y)
+            test_loss += loss.data
+    return test_loss
+
+
 def test_loop_mpn(model, test_dataset, batch_size, device, criterion):
     model.eval()
     if device == 'cuda':
@@ -96,6 +186,31 @@ def test_loop_mpn(model, test_dataset, batch_size, device, criterion):
             x_env, x_cur_pos, x_goal_pos, y = x_env.to(device), x_cur_pos.to(device), x_goal_pos.to(device), y.to(
                 device)
             pre_next = model(x_env, x_cur_pos, x_goal_pos)
+            loss = criterion(pre_next, y)
+            test_loss += loss.data
+    return test_loss
+
+
+def test_loop_mpn_Joint_test(Pnet, Enet, test_dataset, cloud_data, batch_size, device, criterion):
+    Enet.eval()
+    Pnet.eval()
+    if device == 'cuda':
+        Enet.cuda()
+        Pnet.cuda()
+    else:
+        Enet.cpu()
+        Pnet.cpu()
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
+    test_loss = 0
+    with torch.no_grad():
+        for x_cur_pos, x_goal_pos, y, index in test_loader:
+            i = int(index[0])
+            l = index.shape[0]
+            x_cloud = torch.from_numpy(cloud_data[i:i + 1, :, :]).expand(l, 2, 1400)
+            x_cloud, x_cur_pos, x_goal_pos, y = x_cloud.to(device), x_cur_pos.to(device), x_goal_pos.to(device), y.to(
+                device)
+            x_env = Enet(x_cloud)
+            pre_next = Pnet(x_env, x_cur_pos, x_goal_pos)
             loss = criterion(pre_next, y)
             test_loss += loss.data
     return test_loss
@@ -843,6 +958,7 @@ def Train_Eval_Cloud_input_S2D_RB_MDN_main():
                 'loss': train_loss_i_mean
             }, checkpoint_save_file_i)
 
+
 def Train_Eval_Cloud_input_S2D_TL_MDN_main():
     # parm set
     device = 'cuda'
@@ -877,7 +993,6 @@ def Train_Eval_Cloud_input_S2D_TL_MDN_main():
     created_dir(checkpoint_save_dir)
     loss_save_dir = model_dir + 'loss_save/'
     created_dir(loss_save_dir)
-
 
     # For tensorboard vis, the dir can not be too long!
     tensorboard_dir = model_dir + '/exp1'
@@ -965,6 +1080,7 @@ def Train_Eval_Cloud_input_S2D_TL_MDN_main():
                 'loss': train_loss_i_mean
             }, checkpoint_save_file_i)
 
+
 def Train_Eval_Cloud_input_S2D_ThreeL_MDN_main():
     # parm set
     device = 'cuda'
@@ -1000,7 +1116,6 @@ def Train_Eval_Cloud_input_S2D_ThreeL_MDN_main():
     loss_save_dir = model_dir + 'loss_save/'
     created_dir(loss_save_dir)
 
-
     # For tensorboard vis, the dir can not be too long!
     tensorboard_dir = model_dir + '/exp1'
     writer = SummaryWriter(tensorboard_dir)
@@ -1018,11 +1133,13 @@ def Train_Eval_Cloud_input_S2D_ThreeL_MDN_main():
 
     # load dataset
     print("Start load dataset!")
-    train_dataset = GMPNDataset_S2D_ThreeL(data_file=train_data_load_file, env_info_length=env_info_length, data_len=None)
+    train_dataset = GMPNDataset_S2D_ThreeL(data_file=train_data_load_file, env_info_length=env_info_length,
+                                           data_len=None)
     # train_env_test_dataset = GMPNDataset(data_file=train_env_test_data_load_file, env_info_length=env_info_length,
     #                                      data_len=None)
-    new_env_test_dataset = GMPNDataset_S2D_ThreeL(data_file=new_env_test_data_load_file, env_info_length=env_info_length,
-                                              data_len=None)
+    new_env_test_dataset = GMPNDataset_S2D_ThreeL(data_file=new_env_test_data_load_file,
+                                                  env_info_length=env_info_length,
+                                                  data_len=None)
 
     print('Load dataset suc!')
 
@@ -1087,6 +1204,143 @@ def Train_Eval_Cloud_input_S2D_ThreeL_MDN_main():
                 'loss': train_loss_i_mean
             }, checkpoint_save_file_i)
 
+
+def Train_Eval_Cloud_input_S2D_ThreeL_MDN_PtNet_Joint_main():
+    # parm set
+    device = 'cuda'
+
+    mixture_num = 20
+    lr = 3 * 1e-4
+    weight_decay = 0
+    epoch_start = 0
+    epoch_end = 5000
+
+    train_data_load_file = "../../data/train/s2d/1000env_400pt/S2D_Three_Link_Joint_train.npy"
+    cloud_file = "../../data/train/s2d/obs_cloud_30000_2_1400_rd.npy"
+    # train_env_test_data_load_file = "../../../output/data/S2D/MPN_S2D_train_env_test_82k.npy"
+    new_env_test_data_load_file = "../../data/train/s2d/1000env_400pt/S2D_Three_Link_Joint_test.npy"
+    model_name = "MDN_S2D_ThreeL_Joint_1"
+    model_dir = "../../data/model/" + model_name + '/'
+    load_checkpoint_flag = False
+    checkpoint_load_file = '../../../output/model/GMPN_S2D_CLOUD_MDN_6/checkpoint_save/checkpoint_epoch_340.pt'
+
+    created_dir(model_dir)
+    train_vis_fig_save_dir = model_dir + "train_vis_fig/"
+    created_dir(train_vis_fig_save_dir)
+
+    train_env_test_vis_fig_save_dir = model_dir + "train_env_test_vis_fig/"
+    created_dir(train_env_test_vis_fig_save_dir)
+
+    new_env_test_vis_fig_save_dir = model_dir + "new_env_test_vis_fig/"
+    created_dir(new_env_test_vis_fig_save_dir)
+
+    vis_loss_dir = model_dir + 'vis_loss/'
+    created_dir(vis_loss_dir)
+    checkpoint_save_dir = model_dir + 'checkpoint_save/'
+    created_dir(checkpoint_save_dir)
+    loss_save_dir = model_dir + 'loss_save/'
+    created_dir(loss_save_dir)
+
+    # For tensorboard vis, the dir can not be too long!
+    tensorboard_dir = model_dir + '/exp1'
+    writer = SummaryWriter(tensorboard_dir)
+
+    train_batch_size = 128
+    train_env_test_batch_size = 8192
+    new_env_test_batch_size = 128
+    env_info_length = 0
+    train_data_vis_cnt = 30
+    train_env_test_data_vis_cnt = 30
+    new_env_test_data_vis_cnt = 30
+
+    checkpoint_save_interval = 20
+    vis_fig_save_interval = 10
+
+    # load dataset
+    print("Start load dataset!")
+    train_dataset = GMPNDataset_S2D_ThreeL(data_file=train_data_load_file, env_info_length=env_info_length,
+                                           data_len=None, use_env=False)
+    # train_env_test_dataset = GMPNDataset(data_file=train_env_test_data_load_file, env_info_length=env_info_length,
+    #                                      data_len=None)
+    new_env_test_dataset = GMPNDataset_S2D_ThreeL(data_file=new_env_test_data_load_file,
+                                                  env_info_length=env_info_length,
+                                                  data_len=None, use_env=False)
+
+    print('Load dataset suc!')
+
+    # load or create model and optimizer (checkpoint)
+    Enet = PtNet(dim=2)
+    Pnet = GMPN_S2D_CLOUD_MDN_Pnet(input_size=38, output_size=5, mixture_num=mixture_num)
+    Enet = Enet.float()
+    Pnet = Pnet.float()
+    if device == 'cuda':
+        Enet.cuda()
+        Pnet.cuda()
+    else:
+        Enet.cpu()
+        Pnet.cpu()
+    optimizer = torch.optim.Adam([{'params': Enet.parameters()}, {'params': Pnet.parameters()}
+                                  ], lr=lr, weight_decay=weight_decay)
+    print('Create model and optimizer suc!')
+    if load_checkpoint_flag:
+        checkpoint = torch.load(checkpoint_load_file)
+        Enet.load_state_dict(checkpoint['Enet_state_dict'])
+        Pnet.load_state_dict(checkpoint['Pnet_state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])  # 好像也会存下来model.parameters()的cuda状态
+        epoch_start = checkpoint['epoch']
+        print("Load checkpoint suc!")
+
+    train_loss_all = []
+    train_env_test_loss_all = []
+    new_env_test_loss_all = []
+    train_data_size = len(train_dataset)
+    # train_env_test_data_size = len(train_env_test_dataset)
+    new_env_test_data_size = len(new_env_test_dataset)
+    cloud_data = np.load(cloud_file)
+    cloud_data = np.array(cloud_data,dtype=np.float32)
+    for epoch in range(epoch_start + 1, epoch_end + 1):
+        print("---------Epoch--", epoch, "-------")
+        # Train loop
+        Enet.cuda()
+        Pnet.cuda()
+        train_loss_i = Train_loop_mdn_Joint_train(Enet=Enet, Pnet=Pnet, optimizer=optimizer,
+                                                  train_dataset=train_dataset,cloud_data=cloud_data,
+                                                  batch_size=train_batch_size, device=device)
+        train_loss_i_mean = float(train_loss_i.data) * train_batch_size / train_data_size
+        print('Train loss is,', train_loss_i_mean)
+        train_loss_all.append(train_loss_i_mean)
+        # Eval loop
+        # train_env_test_loss_i = test_loop_global_Cloud_input(model=model, test_dataset=train_env_test_dataset,
+        #                                                    batch_size=train_env_test_batch_size, device=device)
+        # train_env_test_loss_i_mean = float(train_env_test_loss_i.data) * train_env_test_batch_size / train_env_test_data_size
+        # print('train_env_test loss is,', train_env_test_loss_i_mean)
+        # train_env_test_loss_all.append(train_env_test_loss_i_mean)
+
+        new_env_test_loss_i = test_loop_mdn_Joint_test(Enet=Enet, Pnet=Pnet, test_dataset=new_env_test_dataset,
+                                                       batch_size=new_env_test_batch_size, cloud_data=cloud_data,
+                                                       device=device)
+        new_env_test_loss_i_mean = float(new_env_test_loss_i.data) * new_env_test_batch_size / new_env_test_data_size
+        print('new_env_test loss is,', new_env_test_loss_i_mean)
+        new_env_test_loss_all.append(new_env_test_loss_i_mean)
+
+        writer.add_scalars('loss', {
+            'train': train_loss_i_mean,
+            # 'train_env_test':train_env_test_loss_i_mean,
+            'new_env_test': new_env_test_loss_i_mean
+        }, epoch)
+
+        # Save checkpoint and loss
+        if epoch % checkpoint_save_interval == 0:
+            checkpoint_save_file_i = checkpoint_save_dir + "checkpoint_epoch_" + str(epoch) + ".pt"
+            torch.save({
+                'epoch': epoch,
+                'Pnet_state_dict': Pnet.state_dict(),
+                'Enet_state_dict': Enet.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'loss': train_loss_i_mean
+            }, checkpoint_save_file_i)
+
+
 def Train_Eval_Cloud_input_Arm_MDN_main():
     # parm set
     device = 'cuda'
@@ -1122,7 +1376,6 @@ def Train_Eval_Cloud_input_Arm_MDN_main():
     loss_save_dir = model_dir + 'loss_save/'
     created_dir(loss_save_dir)
 
-
     # For tensorboard vis, the dir can not be too long!
     tensorboard_dir = model_dir + '/exp1'
     writer = SummaryWriter(tensorboard_dir)
@@ -1144,7 +1397,7 @@ def Train_Eval_Cloud_input_Arm_MDN_main():
     # train_env_test_dataset = GMPNDataset(data_file=train_env_test_data_load_file, env_info_length=env_info_length,
     #                                      data_len=None)
     new_env_test_dataset = GMPNDataset_Arm(data_file=new_env_test_data_load_file, env_info_length=env_info_length,
-                                              data_len=None)
+                                           data_len=None)
 
     print('Load dataset suc!')
 
@@ -1208,6 +1461,7 @@ def Train_Eval_Cloud_input_Arm_MDN_main():
                 'optimizer_state_dict': optimizer.state_dict(),
                 'loss': train_loss_i_mean
             }, checkpoint_save_file_i)
+
 
 def Train_Eval_Cloud_input_S2D_RB_MPN_main():
     # parm set
@@ -1329,6 +1583,8 @@ def Train_Eval_Cloud_input_S2D_RB_MPN_main():
                 'optimizer_state_dict': optimizer.state_dict(),
                 'loss': train_loss_i_mean
             }, checkpoint_save_file_i)
+
+
 def Train_Eval_Cloud_input_S2D_TL_MPN_main():
     # parm set
     device = 'cuda'
@@ -1341,7 +1597,7 @@ def Train_Eval_Cloud_input_S2D_TL_MPN_main():
     # train_env_test_data_load_file = "../../../output/data/S2D/MPN_S2D_train_env_test_82k.npy"
     new_env_test_data_load_file = "../../data/train/s2d/1000env_400pt/S2D_Two_Link_test.npy"
 
-    model_name = "MPN_S2D_TL_2"
+    model_name = "MPN_S2D_TL_test"
     model_dir = "../../data/model/" + model_name + '/'
     load_checkpoint_flag = False
     checkpoint_load_file = '../../../output/model/GMPN_S2D_CLOUD_MDN_6/checkpoint_save/checkpoint_epoch_340.pt'
@@ -1448,6 +1704,8 @@ def Train_Eval_Cloud_input_S2D_TL_MPN_main():
                 'optimizer_state_dict': optimizer.state_dict(),
                 'loss': train_loss_i_mean
             }, checkpoint_save_file_i)
+
+
 def Train_Eval_Cloud_input_S2D_ThreeL_MPN_main():
     # parm set
     device = 'cuda'
@@ -1499,11 +1757,13 @@ def Train_Eval_Cloud_input_S2D_ThreeL_MPN_main():
 
     # load dataset
     print("Start load dataset!")
-    train_dataset = GMPNDataset_S2D_ThreeL(data_file=train_data_load_file, env_info_length=env_info_length, data_len=None)
+    train_dataset = GMPNDataset_S2D_ThreeL(data_file=train_data_load_file, env_info_length=env_info_length,
+                                           data_len=None)
     # train_env_test_dataset = GMPNDataset(data_file=train_env_test_data_load_file, env_info_length=env_info_length,
     #                                      data_len=None)
-    new_env_test_dataset = GMPNDataset_S2D_ThreeL(data_file=new_env_test_data_load_file, env_info_length=env_info_length,
-                                              data_len=None)
+    new_env_test_dataset = GMPNDataset_S2D_ThreeL(data_file=new_env_test_data_load_file,
+                                                  env_info_length=env_info_length,
+                                                  data_len=None)
     print('Load dataset suc!')
 
     # load or create model and optimizer (checkpoint)
@@ -1567,6 +1827,141 @@ def Train_Eval_Cloud_input_S2D_ThreeL_MPN_main():
                 'optimizer_state_dict': optimizer.state_dict(),
                 'loss': train_loss_i_mean
             }, checkpoint_save_file_i)
+
+
+def Train_Eval_Cloud_input_S2D_ThreeL_MPN_PtNet_Joint_main():
+    # parm set
+    device = 'cuda'
+    lr = 3 * 1e-4
+    weight_decay = 0
+    epoch_start = 0
+    epoch_end = 5000
+
+    train_data_load_file = "../../data/train/s2d/1000env_400pt/S2D_Three_Link_Joint_train.npy"
+    cloud_file = "../../data/train/s2d/obs_cloud_30000_2_1400_rd.npy"
+    new_env_test_data_load_file = "../../data/train/s2d/1000env_400pt/S2D_Three_Link_Joint_test.npy"
+
+    model_name = "MPN_S2D_ThreeL_Joint_1"
+    model_dir = "../../data/model/" + model_name + '/'
+    load_checkpoint_flag = False
+    checkpoint_load_file = '../../../output/model/GMPN_S2D_CLOUD_MDN_6/checkpoint_save/checkpoint_epoch_340.pt'
+
+    created_dir(model_dir)
+    train_vis_fig_save_dir = model_dir + "train_vis_fig/"
+    created_dir(train_vis_fig_save_dir)
+
+    train_env_test_vis_fig_save_dir = model_dir + "train_env_test_vis_fig/"
+    created_dir(train_env_test_vis_fig_save_dir)
+
+    new_env_test_vis_fig_save_dir = model_dir + "new_env_test_vis_fig/"
+    created_dir(new_env_test_vis_fig_save_dir)
+
+    vis_loss_dir = model_dir + 'vis_loss/'
+    created_dir(vis_loss_dir)
+    checkpoint_save_dir = model_dir + 'checkpoint_save/'
+    created_dir(checkpoint_save_dir)
+    loss_save_dir = model_dir + 'loss_save/'
+    created_dir(loss_save_dir)
+
+    # For tensorboard vis, the dir can not be too long!
+    tensorboard_dir = model_dir + '/exp1'
+    writer = SummaryWriter(tensorboard_dir)
+
+    train_batch_size = 256
+    train_env_test_batch_size = 8192
+    new_env_test_batch_size = 256
+    env_info_length = 0
+    train_data_vis_cnt = 30
+    train_env_test_data_vis_cnt = 30
+    new_env_test_data_vis_cnt = 30
+
+    checkpoint_save_interval = 20
+    vis_fig_save_interval = 10
+
+    # load dataset
+    print("Start load dataset!")
+    train_dataset = GMPNDataset_S2D_ThreeL(data_file=train_data_load_file, env_info_length=env_info_length, use_env=False,
+                                           data_len=None)
+    # train_env_test_dataset = GMPNDataset(data_file=train_env_test_data_load_file, env_info_length=env_info_length,
+    #                                      data_len=None)
+    new_env_test_dataset = GMPNDataset_S2D_ThreeL(data_file=new_env_test_data_load_file,
+                                                  env_info_length=env_info_length, use_env=False,
+                                                  data_len=None)
+    print('Load dataset suc!')
+
+    # load or create model and optimizer (checkpoint)
+    Enet = PtNet(dim=2)
+    Enet = Enet.float()
+    Pnet = S2D_MDN_Pnet(input_size=38, output_size=5)
+    Pnet = Pnet.float()
+    if device == 'cuda':
+        Enet.cuda()
+        Pnet.cuda()
+    else:
+        Enet.cpu()
+        Pnet.cpu()
+    optimizer = torch.optim.Adam([{'params': Enet.parameters()}, {'params': Pnet.parameters()}
+                                  ], lr=lr, weight_decay=weight_decay)
+    criterion = torch.nn.MSELoss(reduction='mean')
+    print('Create model and optimizer suc!')
+    if load_checkpoint_flag:
+        checkpoint = torch.load(checkpoint_load_file)
+        Enet.load_state_dict(checkpoint['Enet_state_dict'])
+        Pnet.load_state_dict(checkpoint['Pnet_state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])  # 好像也会存下来model.parameters()的cuda状态
+        epoch_start = checkpoint['epoch']
+        print("Load checkpoint suc!")
+
+    train_loss_all = []
+    train_env_test_loss_all = []
+    new_env_test_loss_all = []
+    train_data_size = len(train_dataset)
+    # train_env_test_data_size = len(train_env_test_dataset)
+    new_env_test_data_size = len(new_env_test_dataset)
+    cloud_data = np.load(cloud_file)
+    cloud_data = np.array(cloud_data,dtype=np.float32)
+    for epoch in range(epoch_start + 1, epoch_end + 1):
+        print("---------Epoch--", epoch, "-------")
+        # Train loop
+        Enet.cuda()
+        Pnet.cuda()
+        train_loss_i = Train_loop_mpn_Joint_train(Enet=Enet, Pnet=Pnet, optimizer=optimizer,
+                                                  train_dataset=train_dataset, cloud_data=cloud_data,
+                                                  batch_size=train_batch_size, device=device, criterion=criterion)
+        train_loss_i_mean = float(train_loss_i.data) * train_batch_size / train_data_size
+        print('Train loss is,', train_loss_i_mean)
+        train_loss_all.append(train_loss_i_mean)
+        # Eval loop
+        # train_env_test_loss_i = test_loop_global_Cloud_input(model=model, test_dataset=train_env_test_dataset,
+        #                                                    batch_size=train_env_test_batch_size, device=device)
+        # train_env_test_loss_i_mean = float(train_env_test_loss_i.data) * train_env_test_batch_size / train_env_test_data_size
+        # print('train_env_test loss is,', train_env_test_loss_i_mean)
+        # train_env_test_loss_all.append(train_env_test_loss_i_mean)
+
+        new_env_test_loss_i = test_loop_mpn_Joint_test(Enet=Enet, Pnet=Pnet, test_dataset=new_env_test_dataset,
+                                                       batch_size=new_env_test_batch_size, device=device,cloud_data=cloud_data,
+                                                       criterion=criterion)
+        new_env_test_loss_i_mean = float(new_env_test_loss_i.data) * new_env_test_batch_size / new_env_test_data_size
+        print('new_env_test loss is,', new_env_test_loss_i_mean)
+        new_env_test_loss_all.append(new_env_test_loss_i_mean)
+
+        writer.add_scalars('loss', {
+            'train': train_loss_i_mean,
+            # 'train_env_test':train_env_test_loss_i_mean,
+            'new_env_test': new_env_test_loss_i_mean
+        }, epoch)
+
+        # Save checkpoint and loss
+        if epoch % checkpoint_save_interval == 0:
+            checkpoint_save_file_i = checkpoint_save_dir + "checkpoint_epoch_" + str(epoch) + ".pt"
+            torch.save({
+                'epoch': epoch,
+                'Pnet_state_dict': Pnet.state_dict(),
+                'Enet_state_dict': Enet.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'loss': train_loss_i_mean
+            }, checkpoint_save_file_i)
+
 
 def Train_Eval_Cloud_input_Arm_MPN_main():
     # parm set
@@ -1619,11 +2014,13 @@ def Train_Eval_Cloud_input_Arm_MPN_main():
 
     # load dataset
     print("Start load dataset!")
-    train_dataset = GMPNDataset_S2D_ThreeL(data_file=train_data_load_file, env_info_length=env_info_length, data_len=None)
+    train_dataset = GMPNDataset_S2D_ThreeL(data_file=train_data_load_file, env_info_length=env_info_length,
+                                           data_len=None)
     # train_env_test_dataset = GMPNDataset(data_file=train_env_test_data_load_file, env_info_length=env_info_length,
     #                                      data_len=None)
-    new_env_test_dataset = GMPNDataset_S2D_ThreeL(data_file=new_env_test_data_load_file, env_info_length=env_info_length,
-                                              data_len=None)
+    new_env_test_dataset = GMPNDataset_S2D_ThreeL(data_file=new_env_test_data_load_file,
+                                                  env_info_length=env_info_length,
+                                                  data_len=None)
     print('Load dataset suc!')
 
     # load or create model and optimizer (checkpoint)
@@ -1688,6 +2085,7 @@ def Train_Eval_Cloud_input_Arm_MPN_main():
                 'loss': train_loss_i_mean
             }, checkpoint_save_file_i)
 
+
 if __name__ == '__main__':
     # Train_Eval_global_Cloud_input_main()
     # Train_Eval_global_Cloud_input_MPN_Reg_main_old()
@@ -1695,4 +2093,6 @@ if __name__ == '__main__':
     # Train_Eval_Cloud_input_S2D_RB_MDN_main()
     # Train_Eval_Cloud_input_S2D_TL_MDN_main()
     # Train_Eval_Cloud_input_S2D_RB_MPN_main()
-    Train_Eval_Cloud_input_S2D_TL_MPN_main()
+    # Train_Eval_Cloud_input_S2D_TL_MPN_main()
+    # Train_Eval_Cloud_input_S2D_ThreeL_MDN_PtNet_Joint_main()
+    Train_Eval_Cloud_input_S2D_ThreeL_MPN_PtNet_Joint_main()
