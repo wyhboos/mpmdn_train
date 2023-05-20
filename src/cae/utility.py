@@ -113,18 +113,32 @@ def encode_s2d_cloud_to_latent():
     print(env_latent.shape)
     np.save("../../data/train/s2d/s2d_env_latent_30000", env_latent)
 
+def encode_c3d_cloud_to_latent():
+    envs = np.load("../../data/train/c3d/c3d_obs_cloud_50000.npy", allow_pickle=True)
+    model_encoder = Encoder_S2D(input_size=6000, output_size=28)
+    model_encoder.cuda()
+    checkpoint_load_file = "../../data/model/models/CAE_C3D_ckp_400.pt"
+    checkpoint = torch.load(checkpoint_load_file)
+    model_encoder.load_state_dict(checkpoint['model_encoder_state_dict'])
+    env_cloud = envs.reshape(50000, 6000)
+    env_cloud_t = torch.tensor(env_cloud, dtype=torch.float32)
+    env_cloud_t = env_cloud_t.to('cuda')
+    env_latent = model_encoder(env_cloud_t)
+    env_latent = env_latent.cpu().detach().numpy()
+    print(env_latent.shape)
+    np.save("../../data/train/c3d/c3d_obs_cloud_50000_latent", env_latent)
+
 def obtain_train_eval_data():
     """
-    Arm data only consists of one env with 50000 paths
     :return:
     """
     # paths = np.load("../../data/train/s2d/1000env_400pt/S2D_Three_Link_Path_all.npy", allow_pickle=True)
-    paths = np.load("../../data/train/panda_arm/path_usr_part_49999.npy", allow_pickle=True)
-    paths = [paths]
+    # paths = np.load("../../data/train/panda_arm/path_usr_part_49999.npy", allow_pickle=True)
+    # paths = [paths]
 
-    # paths = np.load("../../data/train/s2d/1000env_400pt/S2D_Three_Link_Path_all.npy", allow_pickle=True)
-    env_latent = np.load("../../data/train/s2d/s2d_env_latent_30000.npy", allow_pickle=True)
-    env_latent = np.ones((1, 28))
+    paths = np.load("../../data/train/c3d/C3D_Point_Path_new/C3D_Point_Path_new_all.npy", allow_pickle=True)
+    env_latent = np.load("../../data/train/c3d/c3d_obs_cloud_50000_latent.npy", allow_pickle=True)
+    # env_latent = np.ones((1, 28))
     train_data = []
     train_data_env = []
     train_data_current = []
@@ -138,7 +152,7 @@ def obtain_train_eval_data():
     test_data_target = []
     test_data_next = []
     test_env_index = []
-    for i in range(1):
+    for i in range(990):
         # print("i", i)
         env_latent_i = env_latent[i, :]
         env_latent_i = env_latent_i.reshape(28)
@@ -152,7 +166,7 @@ def obtain_train_eval_data():
                 target = env_i_path_j[l - 1]
                 current = env_i_path_j[k]
                 next = env_i_path_j[k + 1]
-                if j < 40000:
+                if i < 900:
                     train_data_env.append(env_latent_i)
                     train_data_current.append(current)
                     train_data_target.append(target)
@@ -186,8 +200,8 @@ def obtain_train_eval_data():
     print(test_data.shape)
     np.random.shuffle(test_data)
     np.random.shuffle(train_data)
-    np.save("../../data/train/panda_arm/arm_train_new.npy", train_data)
-    np.save("../../data/train/panda_arm/arm_test_new.npy", test_data)
+    np.save("../../data/train/c3d/C3D_Point_Path_new/C3D_Point_Path_new_train.npy", train_data)
+    np.save("../../data/train/c3d/C3D_Point_Path_new/C3D_Point_Path_new_test.npy", test_data)
 
 def divide_arm_data():
     train = np.load("../../data/train/panda_arm/arm_train.npy")
@@ -200,5 +214,6 @@ def divide_arm_data():
 if __name__ == '__main__':
     # cat_paths()
     # encode_s2d_cloud_to_latent()
+    # encode_c3d_cloud_to_latent()
     obtain_train_eval_data()
     # divide_arm_data()

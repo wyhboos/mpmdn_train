@@ -1,7 +1,7 @@
 import time
 
 from torch.utils.data import DataLoader
-from Data_loader import GMPNDataset, GMPNDataset_S2D_RB, GMPNDataset_S2D_TL, GMPNDataset_S2D_ThreeL, GMPNDataset_Arm
+from Data_loader import GMPNDataset, GMPNDataset_S2D_RB, GMPNDataset_S2D_TL, GMPNDataset_S2D_ThreeL, GMPNDataset_Arm,GMPNDataset_C3D_Point
 from Motion_model import GMPN_REC_MDN_1, GMPN_EDGE_CLOUD_MDN_1, GMPN_S2D_CLOUD_MDN_Pnet, S2D_MDN_Pnet
 from Data_visualization import plot_output_info_for_global, vis_loss, plot_output_info_for_global_MPN_Reg
 from src.cae.CAE_model import PtNet
@@ -57,10 +57,9 @@ def Train_loop_mdn_Joint_train(Enet, Pnet, optimizer, train_dataset, cloud_data,
     train_loss = 0
     for x_cur_pos, x_goal_pos, y, index in train_pbar:
         # prepare cloud data
-        # print(index.shape)
-        i = int(index[0])
         l = index.shape[0]
-        x_cloud = torch.from_numpy(cloud_data[i:i+1, :, :]).expand(l, 2, 1400)
+        index_l = list(np.array(index, dtype=int).reshape(l))
+        x_cloud = torch.from_numpy(cloud_data[index_l, :, :])
         # x_cloud_ = torch.clone(x_cloud_)
         optimizer.zero_grad()
         x_cloud, x_cur_pos, x_goal_pos, y = x_cloud.to(device), x_cur_pos.to(device), x_goal_pos.to(device), y.to(
@@ -112,9 +111,9 @@ def Train_loop_mpn_Joint_train(Enet, Pnet, optimizer, train_dataset, cloud_data,
     train_pbar = tqdm.tqdm(train_loader, position=0, leave=True)
     train_loss = 0
     for x_cur_pos, x_goal_pos, y, index in train_pbar:
-        i = int(index[0])
         l = index.shape[0]
-        x_cloud = torch.from_numpy(cloud_data[i:i+1, :, :]).expand(l, 2, 1400)
+        index_l = list(np.array(index, dtype=int).reshape(l))
+        x_cloud = torch.from_numpy(cloud_data[index_l, :, :])
         optimizer.zero_grad()
         x_cloud, x_cur_pos, x_goal_pos, y = x_cloud.to(device), x_cur_pos.to(device), x_goal_pos.to(device), y.to(
             device)
@@ -160,9 +159,9 @@ def test_loop_mdn_Joint_test(Enet, Pnet, test_dataset, cloud_data, batch_size, d
     test_loss = 0
     with torch.no_grad():
         for x_cur_pos, x_goal_pos, y, index in test_loader:
-            i = int(index[0])
             l = index.shape[0]
-            x_cloud = torch.from_numpy(cloud_data[i:i + 1, :, :]).expand(l, 2, 1400)
+            index_l = list(np.array(index, dtype=int).reshape(l))
+            x_cloud = torch.from_numpy(cloud_data[index_l, :, :])
             # x_cloud = torch.clone(x_cloud)
             x_cloud, x_cur_pos, x_goal_pos, y = x_cloud.to(device), x_cur_pos.to(device), x_goal_pos.to(device), y.to(
                 device)
@@ -204,9 +203,9 @@ def test_loop_mpn_Joint_test(Pnet, Enet, test_dataset, cloud_data, batch_size, d
     test_loss = 0
     with torch.no_grad():
         for x_cur_pos, x_goal_pos, y, index in test_loader:
-            i = int(index[0])
             l = index.shape[0]
-            x_cloud = torch.from_numpy(cloud_data[i:i + 1, :, :]).expand(l, 2, 1400)
+            index_l = list(np.array(index, dtype=int).reshape(l))
+            x_cloud = torch.from_numpy(cloud_data[index_l, :, :])
             x_cloud, x_cur_pos, x_goal_pos, y = x_cloud.to(device), x_cur_pos.to(device), x_goal_pos.to(device), y.to(
                 device)
             x_env = Enet(x_cloud)
@@ -1204,6 +1203,129 @@ def Train_Eval_Cloud_input_S2D_ThreeL_MDN_main():
                 'loss': train_loss_i_mean
             }, checkpoint_save_file_i)
 
+def Train_Eval_Cloud_input_C3D_Point_MDN_main():
+    # parm set
+    device = 'cuda'
+
+    mixture_num = 20
+    lr = 3 * 1e-4
+    weight_decay = 0
+    epoch_start = 0
+    epoch_end = 5000
+
+    train_data_load_file = "../../data/train/c3d/C3D_Point_Path_new/C3D_Point_Path_new_train.npy"
+    # train_env_test_data_load_file = "../../../output/data/S2D/MPN_S2D_train_env_test_82k.npy"
+    new_env_test_data_load_file = "../../data/train/c3d/C3D_Point_Path_new/C3D_Point_Path_new_test.npy"
+    model_name = "MDN_C3D_Point_1"
+    model_dir = "../../data/model/" + model_name + '/'
+    load_checkpoint_flag = False
+    checkpoint_load_file = '../../../output/model/GMPN_S2D_CLOUD_MDN_6/checkpoint_save/checkpoint_epoch_340.pt'
+
+    created_dir(model_dir)
+    train_vis_fig_save_dir = model_dir + "train_vis_fig/"
+    created_dir(train_vis_fig_save_dir)
+
+    train_env_test_vis_fig_save_dir = model_dir + "train_env_test_vis_fig/"
+    created_dir(train_env_test_vis_fig_save_dir)
+
+    new_env_test_vis_fig_save_dir = model_dir + "new_env_test_vis_fig/"
+    created_dir(new_env_test_vis_fig_save_dir)
+
+    vis_loss_dir = model_dir + 'vis_loss/'
+    created_dir(vis_loss_dir)
+    checkpoint_save_dir = model_dir + 'checkpoint_save/'
+    created_dir(checkpoint_save_dir)
+    loss_save_dir = model_dir + 'loss_save/'
+    created_dir(loss_save_dir)
+
+    # For tensorboard vis, the dir can not be too long!
+    tensorboard_dir = model_dir + '/exp1'
+    writer = SummaryWriter(tensorboard_dir)
+
+    train_batch_size = 512
+    train_env_test_batch_size = 8192
+    new_env_test_batch_size = 8192
+    env_info_length = 28
+    train_data_vis_cnt = 30
+    train_env_test_data_vis_cnt = 30
+    new_env_test_data_vis_cnt = 30
+
+    checkpoint_save_interval = 20
+    vis_fig_save_interval = 10
+
+    # load dataset
+    print("Start load dataset!")
+    train_dataset = GMPNDataset_C3D_Point(data_file=train_data_load_file, env_info_length=env_info_length,
+                                           data_len=None)
+    # train_env_test_dataset = GMPNDataset(data_file=train_env_test_data_load_file, env_info_length=env_info_length,
+    #                                      data_len=None)
+    new_env_test_dataset = GMPNDataset_C3D_Point(data_file=new_env_test_data_load_file,
+                                                  env_info_length=env_info_length,
+                                                  data_len=None)
+
+    print('Load dataset suc!')
+
+    # load or create model and optimizer (checkpoint)
+    model = GMPN_S2D_CLOUD_MDN_Pnet(input_size=34, output_size=3, mixture_num=mixture_num)
+    model = model.float()
+    if device == 'cuda':
+        model.cuda()
+    else:
+        model.cpu()
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
+    print('Create model and optimizer suc!')
+    if load_checkpoint_flag:
+        checkpoint = torch.load(checkpoint_load_file)
+        model.load_state_dict(checkpoint['model_state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])  # 好像也会存下来model.parameters()的cuda状态
+        epoch_start = checkpoint['epoch']
+        print("Load checkpoint suc!")
+
+    train_loss_all = []
+    train_env_test_loss_all = []
+    new_env_test_loss_all = []
+    train_data_size = len(train_dataset)
+    # train_env_test_data_size = len(train_env_test_dataset)
+    new_env_test_data_size = len(new_env_test_dataset)
+    for epoch in range(epoch_start + 1, epoch_end + 1):
+        print("---------Epoch--", epoch, "-------")
+        # Train loop
+        model.cuda()
+        train_loss_i = Train_loop_mdn(model=model, optimizer=optimizer, train_dataset=train_dataset,
+                                      batch_size=train_batch_size, device=device)
+        train_loss_i_mean = float(train_loss_i.data) * train_batch_size / train_data_size
+        print('Train loss is,', train_loss_i_mean)
+        train_loss_all.append(train_loss_i_mean)
+        # Eval loop
+        # train_env_test_loss_i = test_loop_global_Cloud_input(model=model, test_dataset=train_env_test_dataset,
+        #                                                    batch_size=train_env_test_batch_size, device=device)
+        # train_env_test_loss_i_mean = float(train_env_test_loss_i.data) * train_env_test_batch_size / train_env_test_data_size
+        # print('train_env_test loss is,', train_env_test_loss_i_mean)
+        # train_env_test_loss_all.append(train_env_test_loss_i_mean)
+
+        new_env_test_loss_i = test_loop_mdn(model=model, test_dataset=new_env_test_dataset,
+                                            batch_size=new_env_test_batch_size, device=device)
+        new_env_test_loss_i_mean = float(new_env_test_loss_i.data) * new_env_test_batch_size / new_env_test_data_size
+        print('new_env_test loss is,', new_env_test_loss_i_mean)
+        new_env_test_loss_all.append(new_env_test_loss_i_mean)
+
+        writer.add_scalars('loss', {
+            'train': train_loss_i_mean,
+            # 'train_env_test':train_env_test_loss_i_mean,
+            'new_env_test': new_env_test_loss_i_mean
+        }, epoch)
+
+        # Save checkpoint and loss
+        if epoch % checkpoint_save_interval == 0:
+            # save checkpoint
+            checkpoint_save_file_i = checkpoint_save_dir + "checkpoint_epoch_" + str(epoch) + ".pt"
+            torch.save({
+                'epoch': epoch,
+                'model_state_dict': model.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'loss': train_loss_i_mean
+            }, checkpoint_save_file_i)
+
 
 def Train_Eval_Cloud_input_S2D_ThreeL_MDN_PtNet_Joint_main():
     # parm set
@@ -1828,6 +1950,128 @@ def Train_Eval_Cloud_input_S2D_ThreeL_MPN_main():
                 'loss': train_loss_i_mean
             }, checkpoint_save_file_i)
 
+def Train_Eval_Cloud_input_C3D_Point_MPN_main():
+    # parm set
+    device = 'cuda'
+    lr = 3 * 1e-4
+    weight_decay = 0
+    epoch_start = 0
+    epoch_end = 5000
+
+    train_data_load_file = "../../data/train/c3d/C3D_Point_Path_new/C3D_Point_Path_new_train.npy"
+    # train_env_test_data_load_file = "../../../output/data/S2D/MPN_S2D_train_env_test_82k.npy"
+    new_env_test_data_load_file = "../../data/train/c3d/C3D_Point_Path_new/C3D_Point_Path_new_test.npy"
+
+    model_name = "MPN_C3D_Point_1"
+    model_dir = "../../data/model/" + model_name + '/'
+    load_checkpoint_flag = False
+    checkpoint_load_file = '../../../output/model/GMPN_S2D_CLOUD_MDN_6/checkpoint_save/checkpoint_epoch_340.pt'
+
+    created_dir(model_dir)
+    train_vis_fig_save_dir = model_dir + "train_vis_fig/"
+    created_dir(train_vis_fig_save_dir)
+
+    train_env_test_vis_fig_save_dir = model_dir + "train_env_test_vis_fig/"
+    created_dir(train_env_test_vis_fig_save_dir)
+
+    new_env_test_vis_fig_save_dir = model_dir + "new_env_test_vis_fig/"
+    created_dir(new_env_test_vis_fig_save_dir)
+
+    vis_loss_dir = model_dir + 'vis_loss/'
+    created_dir(vis_loss_dir)
+    checkpoint_save_dir = model_dir + 'checkpoint_save/'
+    created_dir(checkpoint_save_dir)
+    loss_save_dir = model_dir + 'loss_save/'
+    created_dir(loss_save_dir)
+
+    # For tensorboard vis, the dir can not be too long!
+    tensorboard_dir = model_dir + '/exp1'
+    writer = SummaryWriter(tensorboard_dir)
+
+    train_batch_size = 512
+    train_env_test_batch_size = 8192
+    new_env_test_batch_size = 8192
+    env_info_length = 28
+    train_data_vis_cnt = 30
+    train_env_test_data_vis_cnt = 30
+    new_env_test_data_vis_cnt = 30
+
+    checkpoint_save_interval = 20
+    vis_fig_save_interval = 10
+
+    # load dataset
+    print("Start load dataset!")
+    train_dataset = GMPNDataset_C3D_Point(data_file=train_data_load_file, env_info_length=env_info_length,
+                                           data_len=None)
+    # train_env_test_dataset = GMPNDataset(data_file=train_env_test_data_load_file, env_info_length=env_info_length,
+    #                                      data_len=None)
+    new_env_test_dataset = GMPNDataset_C3D_Point(data_file=new_env_test_data_load_file,
+                                                  env_info_length=env_info_length,
+                                                  data_len=None)
+    print('Load dataset suc!')
+
+    # load or create model and optimizer (checkpoint)
+    model = S2D_MDN_Pnet(input_size=34, output_size=3)
+    model = model.float()
+    if device == 'cuda':
+        model.cuda()
+    else:
+        model.cpu()
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
+    criterion = torch.nn.MSELoss(reduction='mean')
+    print('Create model and optimizer suc!')
+    if load_checkpoint_flag:
+        checkpoint = torch.load(checkpoint_load_file)
+        model.load_state_dict(checkpoint['model_state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])  # 好像也会存下来model.parameters()的cuda状态
+        epoch_start = checkpoint['epoch']
+        print("Load checkpoint suc!")
+
+    train_loss_all = []
+    train_env_test_loss_all = []
+    new_env_test_loss_all = []
+    train_data_size = len(train_dataset)
+    # train_env_test_data_size = len(train_env_test_dataset)
+    new_env_test_data_size = len(new_env_test_dataset)
+    for epoch in range(epoch_start + 1, epoch_end + 1):
+        print("---------Epoch--", epoch, "-------")
+        # Train loop
+        model.cuda()
+        train_loss_i = Train_loop_mpn(model=model, optimizer=optimizer, train_dataset=train_dataset,
+                                      batch_size=train_batch_size, device=device, criterion=criterion)
+        train_loss_i_mean = float(train_loss_i.data) * train_batch_size / train_data_size
+        print('Train loss is,', train_loss_i_mean)
+        train_loss_all.append(train_loss_i_mean)
+        # Eval loop
+        # train_env_test_loss_i = test_loop_global_Cloud_input(model=model, test_dataset=train_env_test_dataset,
+        #                                                    batch_size=train_env_test_batch_size, device=device)
+        # train_env_test_loss_i_mean = float(train_env_test_loss_i.data) * train_env_test_batch_size / train_env_test_data_size
+        # print('train_env_test loss is,', train_env_test_loss_i_mean)
+        # train_env_test_loss_all.append(train_env_test_loss_i_mean)
+
+        new_env_test_loss_i = test_loop_mpn(model=model, test_dataset=new_env_test_dataset,
+                                            batch_size=new_env_test_batch_size, device=device,
+                                            criterion=criterion)
+        new_env_test_loss_i_mean = float(new_env_test_loss_i.data) * new_env_test_batch_size / new_env_test_data_size
+        print('new_env_test loss is,', new_env_test_loss_i_mean)
+        new_env_test_loss_all.append(new_env_test_loss_i_mean)
+
+        writer.add_scalars('loss', {
+            'train': train_loss_i_mean,
+            # 'train_env_test':train_env_test_loss_i_mean,
+            'new_env_test': new_env_test_loss_i_mean
+        }, epoch)
+
+        # Save checkpoint and loss
+        if epoch % checkpoint_save_interval == 0:
+            checkpoint_save_file_i = checkpoint_save_dir + "checkpoint_epoch_" + str(epoch) + ".pt"
+            torch.save({
+                'epoch': epoch,
+                'model_state_dict': model.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'loss': train_loss_i_mean
+            }, checkpoint_save_file_i)
+
 
 def Train_Eval_Cloud_input_S2D_ThreeL_MPN_PtNet_Joint_main():
     # parm set
@@ -2094,5 +2338,5 @@ if __name__ == '__main__':
     # Train_Eval_Cloud_input_S2D_TL_MDN_main()
     # Train_Eval_Cloud_input_S2D_RB_MPN_main()
     # Train_Eval_Cloud_input_S2D_TL_MPN_main()
-    # Train_Eval_Cloud_input_S2D_ThreeL_MDN_PtNet_Joint_main()
-    Train_Eval_Cloud_input_S2D_ThreeL_MPN_PtNet_Joint_main()
+    Train_Eval_Cloud_input_S2D_ThreeL_MDN_PtNet_Joint_main()
+    # Train_Eval_Cloud_input_S2D_ThreeL_MPN_PtNet_Joint_main()

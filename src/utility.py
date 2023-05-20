@@ -6,7 +6,7 @@ import numpy as np
 import argparse
 from plannet.Motion_model import S2D_MDN_Pnet, GMPN_S2D_CLOUD_MDN_Pnet
 import torch
-from cae.CAE_model import Encoder_S2D
+from cae.CAE_model import Encoder_S2D, PtNet
 
 def get_vertex_3D(obs):
     min_ = []
@@ -130,6 +130,35 @@ def get_libtorch_model():
     # o = sm_encoder(i_encoder)
     # sm_encoder.save("../../../output/model/Encoder_S2D.pt")
 
+
+    print("MPN Three Link Joint")
+    encoder = PtNet(dim=2)
+    pnet = S2D_MDN_Pnet(input_size=38, output_size=5)
+    checkpoint_load_file = "../data/model/models/MPN_ThreeL_Joint_1_checkpoint_epoch_60.pt"
+    checkpoint = torch.load(checkpoint_load_file)
+    encoder.load_state_dict(checkpoint['Enet_state_dict'])
+    pnet.load_state_dict(checkpoint['Pnet_state_dict'])
+    sm_encoder = torch.jit.script(encoder)
+    sm_pnet = torch.jit.script(pnet)
+    # i_encoder = torch.rand(1, 2800)
+    # o = sm_encoder(i_encoder)
+    sm_encoder.save("../data/model/models/MPN_ThreeL_Joint_1_ckp_60_Enet_libtorch.pt")
+    sm_pnet.save("../data/model/models/MPN_ThreeL_Joint_1_ckp_60_Pnet_libtorch.pt")
+
+    print("MDN Three Link Joint")
+    encoder = PtNet(dim=2)
+    pnet = GMPN_S2D_CLOUD_MDN_Pnet(input_size=38, output_size=5, mixture_num=20)
+    checkpoint_load_file = "../data/model/models/MDN_ThreeL_Joint_1_checkpoint_epoch_210.pt"
+    checkpoint = torch.load(checkpoint_load_file)
+    encoder.load_state_dict(checkpoint['Enet_state_dict'])
+    pnet.load_state_dict(checkpoint['Pnet_state_dict'])
+    sm_encoder = torch.jit.script(encoder)
+    sm_pnet = torch.jit.script(pnet)
+    # i_encoder = torch.rand(1, 2800)
+    # o = sm_encoder(i_encoder)
+    sm_encoder.save("../data/model/models/MDN_ThreeL_Joint_1_ckp_210_Enet_libtorch.pt")
+    sm_pnet.save("../data/model/models/MDN_ThreeL_Joint_1_ckp_210_Pnet_libtorch.pt")
+
     # print("MDN")
     # mdn = GMPN_S2D_CLOUD_MDN_Pnet(input_size=42, output_size=7, mixture_num=20)
 
@@ -187,18 +216,18 @@ def get_libtorch_model():
     # # #     print(i.shape)
     # sm_mpn.save("../data/model/models/MPN_ARM_1_ckp_500_libtorch.pt")
 
-    mpn = S2D_MDN_Pnet(42, 7)
-    checkpoint_load_file = "../data/model/models/MPN_ARM_3_checkpoint_epoch_100.pt"
-    checkpoint = torch.load(checkpoint_load_file)
-    mpn.load_state_dict(checkpoint['model_state_dict'])
-    sm_mpn = torch.jit.script(mpn)
-    # # i_mpn_x_e = torch.rand(1, 28)
-    # # i_mpn_x_c = torch.rand(1, 2)
-    # # i_mpn_x_g = torch.rand(1, 2)
-    # # o_mpn = sm_mpn(i_mpn_x_e, i_mpn_x_c, i_mpn_x_g)
-    # # for i in o_mpn:
-    # #     print(i.shape)
-    sm_mpn.save("../data/model/models/MPN_ARM_3_ckp_100_libtorch.pt")
+    # mpn = S2D_MDN_Pnet(42, 7)
+    # checkpoint_load_file = "../data/model/models/MPN_ARM_3_checkpoint_epoch_100.pt"
+    # checkpoint = torch.load(checkpoint_load_file)
+    # mpn.load_state_dict(checkpoint['model_state_dict'])
+    # sm_mpn = torch.jit.script(mpn)
+    # # # i_mpn_x_e = torch.rand(1, 28)
+    # # # i_mpn_x_c = torch.rand(1, 2)
+    # # # i_mpn_x_g = torch.rand(1, 2)
+    # # # o_mpn = sm_mpn(i_mpn_x_e, i_mpn_x_c, i_mpn_x_g)
+    # # # for i in o_mpn:
+    # # #     print(i.shape)
+    # sm_mpn.save("../data/model/models/MPN_ARM_3_ckp_100_libtorch.pt")
 
 
     # mpn = S2D_MDN_Pnet(36, 4)
@@ -327,9 +356,28 @@ def change_cloud_dim():
     print(cloud_file_dim_tran[0:1, 1, :7])
     np.save("../data/train/s2d/obs_cloud_30000_2_1400_rd.npy", cloud_file_dim_tran)
 
+def cat_paths():
+    file = "../data/train/c3d/C3D_Point_Path_new/C3D_Point_Path_new"
+    path_r = []
+    for i in range(15):
+        file_i = np.load(file+str(i)+".npy", allow_pickle=True)
+        path_r += list(file_i)
+    print(len(path_r))
+    np.save("../data/train/c3d/C3D_Point_Path_new/C3D_Point_Path_new_all", np.array(path_r))
+
+
+def test():
+    a = np.array([10*i for i in range(10)]).reshape(-1, 1)
+    print(a)
+    index_l = [0,0,0,1,2,5]
+    b = a[index_l, :]
+    print(b)
+
 if __name__ == '__main__':
+    test()
+    # cat_paths()
     # change_cloud_dim()
-    S2D_get_Joint_Train_data()
+    # S2D_get_Joint_Train_data()
     # divide_cloud_to_train_test()
     # make_cloud_random()
     # divide_cloud()
