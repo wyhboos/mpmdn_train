@@ -134,7 +134,7 @@ def get_libtorch_model():
     print("MPN Three Link Joint")
     encoder = PtNet(dim=2)
     pnet = S2D_MDN_Pnet(input_size=38, output_size=5)
-    checkpoint_load_file = "../data/model/models/MPN_ThreeL_Joint_1_checkpoint_epoch_60.pt"
+    checkpoint_load_file = "../data/model/models/MPN_S2D_ThreeL_Joint_1_ckp_50.pt"
     checkpoint = torch.load(checkpoint_load_file)
     encoder.load_state_dict(checkpoint['Enet_state_dict'])
     pnet.load_state_dict(checkpoint['Pnet_state_dict'])
@@ -142,13 +142,13 @@ def get_libtorch_model():
     sm_pnet = torch.jit.script(pnet)
     # i_encoder = torch.rand(1, 2800)
     # o = sm_encoder(i_encoder)
-    sm_encoder.save("../data/model/models/MPN_ThreeL_Joint_1_ckp_60_Enet_libtorch.pt")
-    sm_pnet.save("../data/model/models/MPN_ThreeL_Joint_1_ckp_60_Pnet_libtorch.pt")
+    sm_encoder.save("../data/model/models/MPN_ThreeL_Joint_1_ckp_50_Enet_libtorch.pt")
+    sm_pnet.save("../data/model/models/MPN_ThreeL_Joint_1_ckp_50_Pnet_libtorch.pt")
 
     print("MDN Three Link Joint")
     encoder = PtNet(dim=2)
     pnet = GMPN_S2D_CLOUD_MDN_Pnet(input_size=38, output_size=5, mixture_num=20)
-    checkpoint_load_file = "../data/model/models/MDN_ThreeL_Joint_1_checkpoint_epoch_210.pt"
+    checkpoint_load_file = "../data/model/models/MDN_S2D_ThreeL_Joint_1_ckp_56.pt"
     checkpoint = torch.load(checkpoint_load_file)
     encoder.load_state_dict(checkpoint['Enet_state_dict'])
     pnet.load_state_dict(checkpoint['Pnet_state_dict'])
@@ -156,8 +156,8 @@ def get_libtorch_model():
     sm_pnet = torch.jit.script(pnet)
     # i_encoder = torch.rand(1, 2800)
     # o = sm_encoder(i_encoder)
-    sm_encoder.save("../data/model/models/MDN_ThreeL_Joint_1_ckp_210_Enet_libtorch.pt")
-    sm_pnet.save("../data/model/models/MDN_ThreeL_Joint_1_ckp_210_Pnet_libtorch.pt")
+    sm_encoder.save("../data/model/models/MDN_ThreeL_Joint_1_ckp_56_Enet_libtorch.pt")
+    sm_pnet.save("../data/model/models/MDN_ThreeL_Joint_1_ckp_56_Pnet_libtorch.pt")
 
     # print("MDN")
     # mdn = GMPN_S2D_CLOUD_MDN_Pnet(input_size=42, output_size=7, mixture_num=20)
@@ -244,11 +244,11 @@ def get_libtorch_model():
     # sm_mpn.save("../data/model/models/MPN_S2D_TL_2_ckp_380.pt")
 
 def divide_s2d_cloud():
-    cloud_file = "../data/train/s2d/obs_cloud_30000.npy"
+    cloud_file = "../data/train/s2d/obs_cloud_30000_2_1400_rd.npy"
     cloud_data = np.load(cloud_file)
     print(cloud_data.shape)
-    cloud_data_2000 = cloud_data[:2000, :]
-    np.save("../data/train/s2d/obs_cloud_2000.npy", cloud_data_2000)
+    cloud_data_2000 = cloud_data[:2000, :, :]
+    np.save("../data/train/s2d/obs_cloud_2000_2_1400_rd.npy", cloud_data_2000)
 
 def divide_cloud():
     cloud_file = "../data/train/c3d/c3d_obs_cloud_50000.npy"
@@ -374,14 +374,14 @@ def test():
     print(b)
 
 if __name__ == '__main__':
-    test()
+    # test()
     # cat_paths()
     # change_cloud_dim()
     # S2D_get_Joint_Train_data()
     # divide_cloud_to_train_test()
     # make_cloud_random()
     # divide_cloud()
-    # divide_s2d_cloud()
+    divide_s2d_cloud()
     # get_libtorch_model()
 
     # divide_cloud_to_train_test()
