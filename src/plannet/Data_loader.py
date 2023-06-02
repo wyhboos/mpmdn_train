@@ -41,7 +41,8 @@ class GMPNDataset_S2D_RB(Dataset):
     y:output next position
     """
 
-    def __init__(self, data_file, env_info_length, data_len=None):
+    def __init__(self, data_file, env_info_length, data_len=None, use_env=True):
+        self.use_env = use_env
         data = np.load(data_file, allow_pickle=True)
         data = np.array(data, dtype=np.float32)
         if data_len is not None:
@@ -57,7 +58,10 @@ class GMPNDataset_S2D_RB(Dataset):
         return len(self.y)
 
     def __getitem__(self, item):
-        return self.x_env[item], self.x_cur_pos[item], self.x_goal_pos[item], self.y[item], self.index[item]
+        if self.use_env:
+            return self.x_env[item], self.x_cur_pos[item], self.x_goal_pos[item], self.y[item], self.index[item]
+        else:
+            return self.x_cur_pos[item], self.x_goal_pos[item], self.y[item], self.index[item]
 
 
 class GMPNDataset_S2D_TL(Dataset):
@@ -68,7 +72,8 @@ class GMPNDataset_S2D_TL(Dataset):
     y:output next position
     """
 
-    def __init__(self, data_file, env_info_length, data_len=None):
+    def __init__(self, data_file, env_info_length, data_len=None, use_env=True):
+        self.use_env = use_env
         data = np.load(data_file, allow_pickle=True)
         data = np.array(data, dtype=np.float32)
         if data_len is not None:
@@ -84,7 +89,10 @@ class GMPNDataset_S2D_TL(Dataset):
         return len(self.y)
 
     def __getitem__(self, item):
-        return self.x_env[item], self.x_cur_pos[item], self.x_goal_pos[item], self.y[item], self.index[item]
+        if self.use_env:
+            return self.x_env[item], self.x_cur_pos[item], self.x_goal_pos[item], self.y[item], self.index[item]
+        else:
+            return self.x_cur_pos[item], self.x_goal_pos[item], self.y[item], self.index[item]
 
 
 class GMPNDataset_S2D_ThreeL(Dataset):
