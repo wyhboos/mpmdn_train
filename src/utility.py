@@ -134,7 +134,7 @@ def get_libtorch_model():
     print("MPN Three Link Joint")
     encoder = PtNet(dim=2)
     pnet = S2D_MDN_Pnet(input_size=38, output_size=5)
-    checkpoint_load_file = "../data/model/models/MPN_ThreeL_Joint_1_checkpoint_epoch_60.pt"
+    checkpoint_load_file = "../data/model/models/MPN_S2D_ThreeL_Joint_1_ckp_50.pt"
     checkpoint = torch.load(checkpoint_load_file)
     encoder.load_state_dict(checkpoint['Enet_state_dict'])
     pnet.load_state_dict(checkpoint['Pnet_state_dict'])
@@ -142,13 +142,13 @@ def get_libtorch_model():
     sm_pnet = torch.jit.script(pnet)
     # i_encoder = torch.rand(1, 2800)
     # o = sm_encoder(i_encoder)
-    sm_encoder.save("../data/model/models/MPN_ThreeL_Joint_1_ckp_60_Enet_libtorch.pt")
-    sm_pnet.save("../data/model/models/MPN_ThreeL_Joint_1_ckp_60_Pnet_libtorch.pt")
+    sm_encoder.save("../data/model/models/MPN_ThreeL_Joint_1_ckp_50_Enet_libtorch.pt")
+    sm_pnet.save("../data/model/models/MPN_ThreeL_Joint_1_ckp_50_Pnet_libtorch.pt")
 
     print("MDN Three Link Joint")
     encoder = PtNet(dim=2)
     pnet = GMPN_S2D_CLOUD_MDN_Pnet(input_size=38, output_size=5, mixture_num=20)
-    checkpoint_load_file = "../data/model/models/MDN_ThreeL_Joint_1_checkpoint_epoch_210.pt"
+    checkpoint_load_file = "../data/model/models/MDN_S2D_ThreeL_Joint_1_ckp_56.pt"
     checkpoint = torch.load(checkpoint_load_file)
     encoder.load_state_dict(checkpoint['Enet_state_dict'])
     pnet.load_state_dict(checkpoint['Pnet_state_dict'])
@@ -156,8 +156,8 @@ def get_libtorch_model():
     sm_pnet = torch.jit.script(pnet)
     # i_encoder = torch.rand(1, 2800)
     # o = sm_encoder(i_encoder)
-    sm_encoder.save("../data/model/models/MDN_ThreeL_Joint_1_ckp_210_Enet_libtorch.pt")
-    sm_pnet.save("../data/model/models/MDN_ThreeL_Joint_1_ckp_210_Pnet_libtorch.pt")
+    sm_encoder.save("../data/model/models/MDN_ThreeL_Joint_1_ckp_56_Enet_libtorch.pt")
+    sm_pnet.save("../data/model/models/MDN_ThreeL_Joint_1_ckp_56_Pnet_libtorch.pt")
 
     # print("MDN")
     # mdn = GMPN_S2D_CLOUD_MDN_Pnet(input_size=42, output_size=7, mixture_num=20)
@@ -244,11 +244,11 @@ def get_libtorch_model():
     # sm_mpn.save("../data/model/models/MPN_S2D_TL_2_ckp_380.pt")
 
 def divide_s2d_cloud():
-    cloud_file = "../data/train/s2d/obs_cloud_30000.npy"
+    cloud_file = "../data/train/s2d/obs_cloud_30000_2_1400_rd.npy"
     cloud_data = np.load(cloud_file)
     print(cloud_data.shape)
-    cloud_data_2000 = cloud_data[:2000, :]
-    np.save("../data/train/s2d/obs_cloud_2000.npy", cloud_data_2000)
+    cloud_data_2000 = cloud_data[:2000, :, :]
+    np.save("../data/train/s2d/obs_cloud_2000_2_1400_rd.npy", cloud_data_2000)
 
 def divide_cloud():
     cloud_file = "../data/train/c3d/c3d_obs_cloud_50000.npy"
@@ -260,25 +260,25 @@ def divide_cloud():
     np.save(cloud_small_save_file, cloud_small)
 
 def make_cloud_random():
-    cloud_file = "../data/train/s2d/obs_cloud_30000.npy"
+    cloud_file = "../data/train/c3d/c3d_obs_cloud_50000.npy"
     cloud_data = np.load(cloud_file)
     print(cloud_data.shape)
     random_cloud_all = []
     for i in range(cloud_data.shape[0]):
         print(i)
         cloud_i = cloud_data[i, :]
-        cloud_i = cloud_i.reshape(1400, 2)
+        cloud_i = cloud_i.reshape(2000, 3)
         np.random.shuffle(cloud_i)
-        cloud_i = cloud_i.reshape(2800)
+        cloud_i = cloud_i.reshape(6000)
         random_cloud_all.append(cloud_i)
     random_cloud_all = np.array(random_cloud_all)
     print(random_cloud_all.shape)
-    np.save("../data/train/s2d/obs_cloud_30000_random.npy", random_cloud_all)
+    np.save("../data/train/c3d/c3d_obs_cloud_50000_random.npy", random_cloud_all)
 
 def S2D_get_Joint_Train_data():
-    cloud_file = np.load("../data/train/s2d/obs_cloud_30000_random.npy")
+    cloud_file = np.load("../data/train/c3d/c3d_obs_cloud_2000.npy")
     # paths = np.load("../../data/train/s2d/1000env_400pt/S2D_Three_Link_Path_all.npy", allow_pickle=True)
-    paths = np.load("../data/train/s2d/1000env_400pt/S2D_Three_Link_Path_all.npy", allow_pickle=True)
+    paths = np.load("../data/train/c3d/C3D_Point_Path_new/C3D_Point_Path_new_all.npy", allow_pickle=True)
     train_data = []
     train_data_env = []
     train_data_current = []
@@ -292,10 +292,10 @@ def S2D_get_Joint_Train_data():
     test_data_target = []
     test_data_next = []
     test_env_index = []
-    for i in range(1000):
+    for i in range(990):
         # print("i", i)
         env_latent_i = cloud_file[i, :]
-        env_latent_i = env_latent_i.reshape(2800)
+        env_latent_i = env_latent_i.reshape(6000)
         env_i_paths = paths[i]
         for j in range(len(env_i_paths)):
             env_i_path_j = env_i_paths[j]
@@ -340,21 +340,21 @@ def S2D_get_Joint_Train_data():
     print(test_data.shape)
     np.random.shuffle(test_data)
     np.random.shuffle(train_data)
-    np.save("../data/train/s2d/1000env_400pt/S2D_Three_Link_Joint_train.npy", train_data)
-    np.save("../data/train/s2d/1000env_400pt/S2D_Three_Link_Joint_test.npy", test_data)
+    np.save("../data/train/c3d/C3D_Point_Path_new/C3D_Point_Joint_train.npy", train_data)
+    np.save("../data/train/c3d/C3D_Point_Path_new/C3D_Point_Joint_test.npy", test_data)
 
 def change_cloud_dim():
-    cloud_file = np.load("../data/train/s2d/obs_cloud_30000_random.npy")
-    print(cloud_file[0:1, 0:14])
-    cloud_file_dim = cloud_file.reshape(-1, 1400, 2)
+    cloud_file = np.load("../data/train/c3d/c3d_obs_cloud_50000_random.npy")
+    # print(cloud_file[0:1, 0:14])
+    cloud_file_dim = cloud_file.reshape(-1, 2000, 3)
     cloud_file_dim_tran = np.transpose(cloud_file_dim, (0, 2, 1))
     print(cloud_file_dim_tran.shape)
-    print(cloud_file_dim[0:1, :7, 0])
-    print(cloud_file_dim[0:1, :7, 1])
+    # print(cloud_file_dim[0:1, :7, 0])
+    # print(cloud_file_dim[0:1, :7, 1])
 
-    print(cloud_file_dim_tran[0:1, 0, :7])
-    print(cloud_file_dim_tran[0:1, 1, :7])
-    np.save("../data/train/s2d/obs_cloud_30000_2_1400_rd.npy", cloud_file_dim_tran)
+    # print(cloud_file_dim_tran[0:1, 0, :7])
+    # print(cloud_file_dim_tran[0:1, 1, :7])
+    np.save("../data/train/c3d/c3d_obs_cloud_2000_3_2000_rd.npy", cloud_file_dim_tran[:2000, :, :])
 
 def cat_paths():
     file = "../data/train/c3d/C3D_Point_Path_new/C3D_Point_Path_new"
@@ -374,15 +374,16 @@ def test():
     print(b)
 
 if __name__ == '__main__':
-    test()
+    # test()
     # cat_paths()
-    # change_cloud_dim()
+    change_cloud_dim()
     # S2D_get_Joint_Train_data()
     # divide_cloud_to_train_test()
     # make_cloud_random()
     # divide_cloud()
     # divide_s2d_cloud()
     # get_libtorch_model()
+    # make_cloud_random()
 
     # divide_cloud_to_train_test()
 
