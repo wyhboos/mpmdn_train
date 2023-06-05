@@ -1883,10 +1883,10 @@ def Train_Eval_Cloud_input_Arm_MDN_main():
     epoch_start = 0
     epoch_end = 5000
 
-    train_data_load_file = "../../data/train/panda_arm/arm_train_s.npy"
+    train_data_load_file = "../../data/train/panda_arm/Arm_RRTs_32000_train.npy"
     # train_env_test_data_load_file = "../../../output/data/S2D/MPN_S2D_train_env_test_82k.npy"
-    new_env_test_data_load_file = "../../data/train/panda_arm/arm_test_s.npy"
-    model_name = "MDN_ARM_1"
+    new_env_test_data_load_file = "../../data/train/panda_arm/Arm_RRTs_8000_test.npy"
+    model_name = "MDN_ARM_RRTS_1"
     model_dir = "../../data/model/" + model_name + '/'
     load_checkpoint_flag = False
     checkpoint_load_file = '../../../output/model/GMPN_S2D_CLOUD_MDN_6/checkpoint_save/checkpoint_epoch_340.pt'
@@ -1914,13 +1914,13 @@ def Train_Eval_Cloud_input_Arm_MDN_main():
 
     train_batch_size = 1024
     train_env_test_batch_size = 8192
-    new_env_test_batch_size = 8192
+    new_env_test_batch_size = 1024
     env_info_length = 28
     train_data_vis_cnt = 30
     train_env_test_data_vis_cnt = 30
     new_env_test_data_vis_cnt = 30
 
-    checkpoint_save_interval = 20
+    checkpoint_save_interval = 5
     vis_fig_save_interval = 10
 
     # load dataset
@@ -3032,11 +3032,11 @@ def Train_Eval_Cloud_input_Arm_MPN_main():
     epoch_start = 0
     epoch_end = 5000
 
-    train_data_load_file = "../../data/train/panda_arm/arm_train_s.npy"
+    train_data_load_file = "../../data/train/panda_arm/Arm_RRTs_32000_train.npy.npy"
     # train_env_test_data_load_file = "../../../output/data/S2D/MPN_S2D_train_env_test_82k.npy"
-    new_env_test_data_load_file = "../../data/train/panda_arm/arm_test_s.npy"
+    new_env_test_data_load_file = "../../data/train/panda_arm/Arm_RRTs_8000_test.npy.npy"
 
-    model_name = "MPN_ARM_1"
+    model_name = "MPN_ARM_RRTS_1"
     model_dir = "../../data/model/" + model_name + '/'
     load_checkpoint_flag = False
     checkpoint_load_file = '../../../output/model/GMPN_S2D_CLOUD_MDN_6/checkpoint_save/checkpoint_epoch_340.pt'
@@ -3075,17 +3075,17 @@ def Train_Eval_Cloud_input_Arm_MPN_main():
 
     # load dataset
     print("Start load dataset!")
-    train_dataset = GMPNDataset_S2D_ThreeL(data_file=train_data_load_file, env_info_length=env_info_length,
+    train_dataset = GMPNDataset_Arm(data_file=train_data_load_file, env_info_length=env_info_length,
                                            data_len=None)
     # train_env_test_dataset = GMPNDataset(data_file=train_env_test_data_load_file, env_info_length=env_info_length,
     #                                      data_len=None)
-    new_env_test_dataset = GMPNDataset_S2D_ThreeL(data_file=new_env_test_data_load_file,
+    new_env_test_dataset = GMPNDataset_Arm(data_file=new_env_test_data_load_file,
                                                   env_info_length=env_info_length,
                                                   data_len=None)
     print('Load dataset suc!')
 
     # load or create model and optimizer (checkpoint)
-    model = S2D_MDN_Pnet(input_size=38, output_size=5)
+    model = S2D_MDN_Pnet(input_size=42, output_size=7)
     model = model.float()
     if device == 'cuda':
         model.cuda()
