@@ -131,24 +131,24 @@ def get_libtorch_model():
     # sm_encoder.save("../../../output/model/Encoder_S2D.pt")
 
 
-    print("MPN Three Link Joint")
-    encoder = PtNet(dim=2)
-    pnet = S2D_MDN_Pnet(input_size=38, output_size=5)
-    checkpoint_load_file = "../data/model/models/MPN_S2D_ThreeL_Joint_1_ckp_50.pt"
-    checkpoint = torch.load(checkpoint_load_file)
-    encoder.load_state_dict(checkpoint['Enet_state_dict'])
-    pnet.load_state_dict(checkpoint['Pnet_state_dict'])
-    sm_encoder = torch.jit.script(encoder)
-    sm_pnet = torch.jit.script(pnet)
-    # i_encoder = torch.rand(1, 2800)
-    # o = sm_encoder(i_encoder)
-    sm_encoder.save("../data/model/models/MPN_ThreeL_Joint_1_ckp_50_Enet_libtorch.pt")
-    sm_pnet.save("../data/model/models/MPN_ThreeL_Joint_1_ckp_50_Pnet_libtorch.pt")
+    # print("MPN Three Link Joint")
+    # encoder = PtNet(dim=2)
+    # pnet = S2D_MDN_Pnet(input_size=38, output_size=5)
+    # checkpoint_load_file = "../data/model/models/MPN_S2D_ThreeL_Joint_1_ckp_50.pt"
+    # checkpoint = torch.load(checkpoint_load_file)
+    # encoder.load_state_dict(checkpoint['Enet_state_dict'])
+    # pnet.load_state_dict(checkpoint['Pnet_state_dict'])
+    # sm_encoder = torch.jit.script(encoder)
+    # sm_pnet = torch.jit.script(pnet)
+    # # i_encoder = torch.rand(1, 2800)
+    # # o = sm_encoder(i_encoder)
+    # sm_encoder.save("../data/model/models/MPN_ThreeL_Joint_1_ckp_50_Enet_libtorch.pt")
+    # sm_pnet.save("../data/model/models/MPN_ThreeL_Joint_1_ckp_50_Pnet_libtorch.pt")
 
     print("MDN Three Link Joint")
     encoder = PtNet(dim=2)
-    pnet = GMPN_S2D_CLOUD_MDN_Pnet(input_size=38, output_size=5, mixture_num=20)
-    checkpoint_load_file = "../data/model/models/MDN_S2D_ThreeL_Joint_1_ckp_56.pt"
+    pnet = GMPN_S2D_CLOUD_MDN_Pnet(input_size=34, output_size=3, mixture_num=20)
+    checkpoint_load_file = "../data/model/models/MDN_S2D_RB_Joint_1_ckp_160.pt"
     checkpoint = torch.load(checkpoint_load_file)
     encoder.load_state_dict(checkpoint['Enet_state_dict'])
     pnet.load_state_dict(checkpoint['Pnet_state_dict'])
@@ -156,8 +156,8 @@ def get_libtorch_model():
     sm_pnet = torch.jit.script(pnet)
     # i_encoder = torch.rand(1, 2800)
     # o = sm_encoder(i_encoder)
-    sm_encoder.save("../data/model/models/MDN_ThreeL_Joint_1_ckp_56_Enet_libtorch.pt")
-    sm_pnet.save("../data/model/models/MDN_ThreeL_Joint_1_ckp_56_Pnet_libtorch.pt")
+    sm_encoder.save("../data/model/models/MDN_S2D_RB_Joint_1_ckp_160_Enet_libtorch.pt")
+    sm_pnet.save("../data/model/models/MDN_S2D_RB_Joint_1_ckp_160_Pnet_libtorch.pt")
 
     # print("MDN")
     # mdn = GMPN_S2D_CLOUD_MDN_Pnet(input_size=42, output_size=7, mixture_num=20)
@@ -376,13 +376,13 @@ def test():
 if __name__ == '__main__':
     # test()
     # cat_paths()
-    change_cloud_dim()
+    # change_cloud_dim()
     # S2D_get_Joint_Train_data()
     # divide_cloud_to_train_test()
     # make_cloud_random()
     # divide_cloud()
     # divide_s2d_cloud()
-    # get_libtorch_model()
+    get_libtorch_model()
     # make_cloud_random()
 
     # divide_cloud_to_train_test()
