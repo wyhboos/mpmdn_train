@@ -1338,7 +1338,7 @@ def Train_Eval_Cloud_input_S2D_RB_MDN_PtNet_Joint_main():
     lr = 3 * 1e-4
     weight_decay = 0
     epoch_start = 0
-    epoch_end = 5000
+    epoch_end = 2000
 
     train_data_load_file = "../../data/train/s2d/1000env_400pt/S2D_Rigidbody_Joint_train.npy"
     cloud_file = "../../data/train/s2d/obs_cloud_30000_2_1400_rd.npy"
@@ -1370,15 +1370,15 @@ def Train_Eval_Cloud_input_S2D_RB_MDN_PtNet_Joint_main():
     tensorboard_dir = model_dir + '/exp1'
     writer = SummaryWriter(tensorboard_dir)
 
-    train_batch_size = 128
+    train_batch_size = 256
     train_env_test_batch_size = 8192
-    new_env_test_batch_size = 128
+    new_env_test_batch_size = 256
     env_info_length = 0
     train_data_vis_cnt = 30
     train_env_test_data_vis_cnt = 30
     new_env_test_data_vis_cnt = 30
 
-    checkpoint_save_interval = 20
+    checkpoint_save_interval = 2
     vis_fig_save_interval = 10
 
     # load dataset
@@ -1506,15 +1506,15 @@ def Train_Eval_Cloud_input_S2D_TwoL_MDN_PtNet_Joint_main():
     tensorboard_dir = model_dir + '/exp1'
     writer = SummaryWriter(tensorboard_dir)
 
-    train_batch_size = 128
-    train_env_test_batch_size = 8192
-    new_env_test_batch_size = 128
+    train_batch_size =256
+    train_env_test_batch_size = 256
+    new_env_test_batch_size = 256
     env_info_length = 0
     train_data_vis_cnt = 30
     train_env_test_data_vis_cnt = 30
     new_env_test_data_vis_cnt = 30
 
-    checkpoint_save_interval = 20
+    checkpoint_save_interval = 2
     vis_fig_save_interval = 10
 
     # load dataset
@@ -2395,7 +2395,7 @@ def Train_Eval_Cloud_input_S2D_RB_MPN_PtNet_Joint_main():
     train_env_test_data_vis_cnt = 30
     new_env_test_data_vis_cnt = 30
 
-    checkpoint_save_interval = 20
+    checkpoint_save_interval = 2
     vis_fig_save_interval = 10
 
     # load dataset
@@ -2522,15 +2522,15 @@ def Train_Eval_Cloud_input_S2D_TwoL_MPN_PtNet_Joint_main():
     tensorboard_dir = model_dir + '/exp1'
     writer = SummaryWriter(tensorboard_dir)
 
-    train_batch_size = 256
+    train_batch_size = 128
     train_env_test_batch_size = 8192
-    new_env_test_batch_size = 256
+    new_env_test_batch_size = 128
     env_info_length = 0
     train_data_vis_cnt = 30
     train_env_test_data_vis_cnt = 30
     new_env_test_data_vis_cnt = 30
 
-    checkpoint_save_interval = 20
+    checkpoint_save_interval = 2
     vis_fig_save_interval = 10
 
     # load dataset
@@ -2657,9 +2657,9 @@ def Train_Eval_Cloud_input_S2D_ThreeL_MPN_PtNet_Joint_main():
     tensorboard_dir = model_dir + '/exp1'
     writer = SummaryWriter(tensorboard_dir)
 
-    train_batch_size = 256
+    train_batch_size = 128
     train_env_test_batch_size = 8192
-    new_env_test_batch_size = 256
+    new_env_test_batch_size = 128
     env_info_length = 0
     train_data_vis_cnt = 30
     train_env_test_data_vis_cnt = 30
@@ -2889,4 +2889,10 @@ if __name__ == '__main__':
     # Train_Eval_Cloud_input_S2D_ThreeL_MDN_PtNet_Joint_main()
     # Train_Eval_Cloud_input_S2D_ThreeL_MPN_PtNet_Joint_main()
     # Train_Eval_Cloud_input_C3D_Point_MDN_main()
-    Train_Eval_Cloud_input_C3D_Point_MPN_main()
+    # Train_Eval_Cloud_input_C3D_Point_MPN_main()
+
+    # Train_Eval_Cloud_input_S2D_RB_MDN_PtNet_Joint_main()
+    # Train_Eval_Cloud_input_S2D_RB_MPN_PtNet_Joint_main()
+    Train_Eval_Cloud_input_S2D_TwoL_MDN_PtNet_Joint_main()
+    # Train_Eval_Cloud_input_S2D_TwoL_MPN_PtNet_Joint_main()
+
