@@ -3032,9 +3032,9 @@ def Train_Eval_Cloud_input_Arm_MPN_main():
     epoch_start = 0
     epoch_end = 5000
 
-    train_data_load_file = "../../data/train/panda_arm/Arm_RRTs_32000_train.npy.npy"
+    train_data_load_file = "../../data/train/panda_arm/Arm_RRTs_32000_train.npy"
     # train_env_test_data_load_file = "../../../output/data/S2D/MPN_S2D_train_env_test_82k.npy"
-    new_env_test_data_load_file = "../../data/train/panda_arm/Arm_RRTs_8000_test.npy.npy"
+    new_env_test_data_load_file = "../../data/train/panda_arm/Arm_RRTs_8000_test.npy"
 
     model_name = "MPN_ARM_RRTS_1"
     model_dir = "../../data/model/" + model_name + '/'
@@ -3064,13 +3064,13 @@ def Train_Eval_Cloud_input_Arm_MPN_main():
 
     train_batch_size = 1024
     train_env_test_batch_size = 8192
-    new_env_test_batch_size = 8192
+    new_env_test_batch_size = 1024
     env_info_length = 28
     train_data_vis_cnt = 30
     train_env_test_data_vis_cnt = 30
     new_env_test_data_vis_cnt = 30
 
-    checkpoint_save_interval = 20
+    checkpoint_save_interval = 5
     vis_fig_save_interval = 10
 
     # load dataset
@@ -3084,7 +3084,7 @@ def Train_Eval_Cloud_input_Arm_MPN_main():
                                                   data_len=None)
     print('Load dataset suc!')
 
-    # load or create model and optimizer (checkpoint)
+    # load or create model and optimizer (checkpoint)-
     model = S2D_MDN_Pnet(input_size=42, output_size=7)
     model = model.float()
     if device == 'cuda':
@@ -3166,5 +3166,10 @@ if __name__ == '__main__':
     # Train_Eval_Cloud_input_S2D_TwoL_MPN_PtNet_Joint_main()
 
     # Train_Eval_Cloud_input_C3D_Point_MDN_PtNet_Joint_main()
-    Train_Eval_Cloud_input_C3D_Point_MPN_PtNet_Joint_main()
+    # Train_Eval_Cloud_input_C3D_Point_MPN_PtNet_Joint_main()
+
+    # Train_Eval_Cloud_input_Arm_MDN_main()
+    Train_Eval_Cloud_input_Arm_MPN_main()
+
+
 
