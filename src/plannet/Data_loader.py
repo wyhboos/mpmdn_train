@@ -33,6 +33,37 @@ class GMPNDataset(Dataset):
         return self.x_env[item], self.x_cur_pos[item], self.x_goal_pos[item], self.y[item], self.index[item]
 
 
+
+class GMPNDataset_S2D_Pt(Dataset):
+    """
+    x_env:input env info
+    x_cur_pos:input current position
+    x_goal_pos:input goal position
+    y:output next position
+    """
+
+    def __init__(self, data_file, env_info_length, data_len=None, use_env=True):
+        self.use_env = use_env
+        data = np.load(data_file, allow_pickle=True)
+        data = np.array(data, dtype=np.float32)
+        if data_len is not None:
+            data = data[:data_len, :]
+        print("Data shape is:", data.shape)
+        self.x_env = data[:, :env_info_length]
+        self.x_cur_pos = data[:, env_info_length:env_info_length + 2]
+        self.x_goal_pos = data[:, env_info_length + 2:env_info_length + 4]
+        self.y = data[:, env_info_length + 4:env_info_length + 6]
+        self.index = data[:, env_info_length + 6:env_info_length + 7]
+
+    def __len__(self):
+        return len(self.y)
+
+    def __getitem__(self, item):
+        if self.use_env:
+            return self.x_env[item], self.x_cur_pos[item], self.x_goal_pos[item], self.y[item], self.index[item]
+        else:
+            return self.x_cur_pos[item], self.x_goal_pos[item], self.y[item], self.index[item]
+
 class GMPNDataset_S2D_RB(Dataset):
     """
     x_env:input env info
