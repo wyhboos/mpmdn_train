@@ -278,7 +278,7 @@ def make_cloud_random():
 def S2D_get_Joint_Train_data():
     cloud_file = np.load("../data/train/c3d/c3d_obs_cloud_2000.npy")
     # paths = np.load("../../data/train/s2d/1000env_400pt/S2D_Three_Link_Path_all.npy", allow_pickle=True)
-    paths = np.load("../data/train/c3d/C3D_Point_Path_new/C3D_Point_Path_new_all.npy", allow_pickle=True)
+    paths = np.load("../data/train/s2d/1000env_400pt/S2D_Point_Path_/S2D_Point_Path_all.npy", allow_pickle=True)
     train_data = []
     train_data_env = []
     train_data_current = []
@@ -292,7 +292,7 @@ def S2D_get_Joint_Train_data():
     test_data_target = []
     test_data_next = []
     test_env_index = []
-    for i in range(990):
+    for i in range(1000):
         # print("i", i)
         env_latent_i = cloud_file[i, :]
         env_latent_i = env_latent_i.reshape(6000)
@@ -340,8 +340,8 @@ def S2D_get_Joint_Train_data():
     print(test_data.shape)
     np.random.shuffle(test_data)
     np.random.shuffle(train_data)
-    np.save("../data/train/c3d/C3D_Point_Path_new/C3D_Point_Joint_train.npy", train_data)
-    np.save("../data/train/c3d/C3D_Point_Path_new/C3D_Point_Joint_test.npy", test_data)
+    np.save("../data/train/s2d/1000env_400pt/S2D_Point_Path_/S2D_Point_Joint_train.npy", train_data)
+    np.save("../data/train/s2d/1000env_400pt/S2D_Point_Path_/S2D_Point_Joint_test.npy", test_data)
 
 
 def Panda_arm_get_Train_data_single_env():
@@ -426,13 +426,13 @@ def change_cloud_dim():
     np.save("../data/train/c3d/c3d_obs_cloud_2000_3_2000_rd.npy", cloud_file_dim_tran[:2000, :, :])
 
 def cat_paths():
-    file = "../data/train/c3d/C3D_Point_Path_new/C3D_Point_Path_new"
+    file = "../data/train/s2d/1000env_400pt/S2D_Point_Path_/S2D_Point_Path_"
     path_r = []
-    for i in range(15):
+    for i in range(20):
         file_i = np.load(file+str(i)+".npy", allow_pickle=True)
         path_r += list(file_i)
     print(len(path_r))
-    np.save("../data/train/c3d/C3D_Point_Path_new/C3D_Point_Path_new_all", np.array(path_r))
+    np.save("../data/train/s2d/1000env_400pt/S2D_Point_Path_/S2D_Point_Path_all.npy", np.array(path_r))
 
 
 def test():
@@ -446,8 +446,8 @@ if __name__ == '__main__':
     # test()
     # cat_paths()
     # change_cloud_dim()
-    # S2D_get_Joint_Train_data()
-    Panda_arm_get_Train_data_single_env()
+    S2D_get_Joint_Train_data()
+    # Panda_arm_get_Train_data_single_env()
     # divide_cloud_to_train_test()
     # make_cloud_random()
     # divide_cloud()
