@@ -343,6 +343,75 @@ def S2D_get_Joint_Train_data():
     np.save("../data/train/c3d/C3D_Point_Path_new/C3D_Point_Joint_train.npy", train_data)
     np.save("../data/train/c3d/C3D_Point_Path_new/C3D_Point_Joint_test.npy", test_data)
 
+
+def Panda_arm_get_Train_data_single_env():
+    # cloud_file = np.load("../data/train/c3d/c3d_obs_cloud_2000.npy")
+    # paths = np.load("../../data/train/s2d/1000env_400pt/S2D_Three_Link_Path_all.npy", allow_pickle=True)
+    paths = np.load("../data/train/panda_arm/path_usr_rrtstar_part_49999.npy", allow_pickle=True)
+    paths = [paths]
+    train_data = []
+    train_data_env = []
+    train_data_current = []
+    train_data_target = []
+    train_data_next = []
+    train_env_index = []
+
+    test_data = []
+    test_data_env = []
+    test_data_current = []
+    test_data_target = []
+    test_data_next = []
+    test_env_index = []
+    for i in range(1):
+        # print("i", i)
+        env_latent_i = np.ones(28)
+        # env_latent_i = env_latent_i.reshape(6000)
+        env_i_paths = paths[i]
+        for j in range(len(env_i_paths)):
+            env_i_path_j = env_i_paths[j]
+            # l = env_i_path_j.shape[0]
+            l = len(env_i_path_j)
+            print("i,j,l", i, j, l)
+            for k in range(l - 1):
+                target = env_i_path_j[l - 1]
+                current = env_i_path_j[k]
+                next = env_i_path_j[k + 1]
+                if j < 32000:
+                    train_data_env.append(env_latent_i)
+                    train_data_current.append(current)
+                    train_data_target.append(target)
+                    train_data_next.append(next)
+                    train_env_index.append(i)
+                else:
+                    test_data_env.append(env_latent_i)
+                    test_data_current.append(current)
+                    test_data_target.append(target)
+                    test_data_next.append(next)
+                    test_env_index.append(i)
+
+    train_data_env = np.array(train_data_env, dtype=np.float32)
+    train_data_current = np.array(train_data_current, dtype=np.float32)
+    train_data_target = np.array(train_data_target, dtype=np.float32)
+    train_data_next = np.array(train_data_next, dtype=np.float32)
+    train_env_index = np.array(train_env_index, dtype=np.float32)
+    train_env_index = train_env_index.reshape(-1, 1)
+
+    train_data = np.concatenate((train_data_env, train_data_current, train_data_target, train_data_next, train_env_index), axis=1)
+    print(train_data.shape)
+
+    test_data_env = np.array(test_data_env, dtype=np.float32)
+    test_data_current = np.array(test_data_current, dtype=np.float32)
+    test_data_target = np.array(test_data_target, dtype=np.float32)
+    test_data_next = np.array(test_data_next, dtype=np.float32)
+    test_env_index = np.array(test_env_index, dtype=np.float32)
+    test_env_index = test_env_index.reshape(-1, 1)
+    test_data = np.concatenate(
+        (test_data_env, test_data_current, test_data_target, test_data_next, test_env_index), axis=1)
+    print(test_data.shape)
+    np.random.shuffle(test_data)
+    np.random.shuffle(train_data)
+    np.save("../data/train/panda_arm/Arm_RRTs_32000_train.npy", train_data)
+    np.save("../data/train/panda_arm/Arm_RRTs_8000_test.npy", test_data)
 def change_cloud_dim():
     cloud_file = np.load("../data/train/c3d/c3d_obs_cloud_50000_random.npy")
     # print(cloud_file[0:1, 0:14])
@@ -378,11 +447,12 @@ if __name__ == '__main__':
     # cat_paths()
     # change_cloud_dim()
     # S2D_get_Joint_Train_data()
+    Panda_arm_get_Train_data_single_env()
     # divide_cloud_to_train_test()
     # make_cloud_random()
     # divide_cloud()
     # divide_s2d_cloud()
-    get_libtorch_model()
+    # get_libtorch_model()
     # make_cloud_random()
 
     # divide_cloud_to_train_test()
