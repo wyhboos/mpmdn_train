@@ -136,8 +136,8 @@ def obtain_train_eval_data():
     # paths = np.load("../../data/train/panda_arm/path_usr_part_49999.npy", allow_pickle=True)
     # paths = [paths]
 
-    paths = np.load("../../data/train/c3d/C3D_Point_Path_new/C3D_Point_Path_new_all.npy", allow_pickle=True)
-    env_latent = np.load("../../data/train/c3d/c3d_obs_cloud_50000_latent.npy", allow_pickle=True)
+    paths = np.load("../../data/train/s2d/1000env_400pt/S2D_Point_Path_/S2D_Point_Path_all.npy", allow_pickle=True)
+    env_latent = np.load("../../data/train/s2d/s2d_env_latent_30000.npy", allow_pickle=True)
     # env_latent = np.ones((1, 28))
     train_data = []
     train_data_env = []
@@ -152,7 +152,7 @@ def obtain_train_eval_data():
     test_data_target = []
     test_data_next = []
     test_env_index = []
-    for i in range(990):
+    for i in range(1000):
         # print("i", i)
         env_latent_i = env_latent[i, :]
         env_latent_i = env_latent_i.reshape(28)
@@ -200,8 +200,8 @@ def obtain_train_eval_data():
     print(test_data.shape)
     np.random.shuffle(test_data)
     np.random.shuffle(train_data)
-    np.save("../../data/train/c3d/C3D_Point_Path_new/C3D_Point_Path_new_train.npy", train_data)
-    np.save("../../data/train/c3d/C3D_Point_Path_new/C3D_Point_Path_new_test.npy", test_data)
+    np.save("../../data/train/s2d/1000env_400pt/S2D_Point_Path_/S2D_Point_train.npy", train_data)
+    np.save("../../data/train/s2d/1000env_400pt/S2D_Point_Path_/S2D_Point_test.npy", test_data)
 
 def divide_arm_data():
     train = np.load("../../data/train/panda_arm/arm_train.npy")

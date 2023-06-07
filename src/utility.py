@@ -132,9 +132,9 @@ def get_libtorch_model():
 
 
     # print("MPN Three Link Joint")
-    # encoder = PtNet(dim=2)
-    # pnet = S2D_MDN_Pnet(input_size=38, output_size=5)
-    # checkpoint_load_file = "../data/model/models/MPN_S2D_ThreeL_Joint_1_ckp_50.pt"
+    # encoder = PtNet(dim=3)
+    # pnet = S2D_MDN_Pnet(input_size=34, output_size=3)
+    # checkpoint_load_file = "../data/model/models/MPN_C3D_Point_Joint_1_ckp_126.pt"
     # checkpoint = torch.load(checkpoint_load_file)
     # encoder.load_state_dict(checkpoint['Enet_state_dict'])
     # pnet.load_state_dict(checkpoint['Pnet_state_dict'])
@@ -142,22 +142,22 @@ def get_libtorch_model():
     # sm_pnet = torch.jit.script(pnet)
     # # i_encoder = torch.rand(1, 2800)
     # # o = sm_encoder(i_encoder)
-    # sm_encoder.save("../data/model/models/MPN_ThreeL_Joint_1_ckp_50_Enet_libtorch.pt")
-    # sm_pnet.save("../data/model/models/MPN_ThreeL_Joint_1_ckp_50_Pnet_libtorch.pt")
+    # sm_encoder.save("../data/model/models/MPN_C3D_Point_Joint_1_ckp_126_Enet_libtorch.pt")
+    # sm_pnet.save("../data/model/models/MPN_C3D_Point_Joint_1_ckp_126_Pnet_libtorch.pt")
 
-    print("MDN Three Link Joint")
-    encoder = PtNet(dim=2)
-    pnet = GMPN_S2D_CLOUD_MDN_Pnet(input_size=34, output_size=3, mixture_num=20)
-    checkpoint_load_file = "../data/model/models/MDN_S2D_RB_Joint_1_ckp_160.pt"
-    checkpoint = torch.load(checkpoint_load_file)
-    encoder.load_state_dict(checkpoint['Enet_state_dict'])
-    pnet.load_state_dict(checkpoint['Pnet_state_dict'])
-    sm_encoder = torch.jit.script(encoder)
-    sm_pnet = torch.jit.script(pnet)
-    # i_encoder = torch.rand(1, 2800)
-    # o = sm_encoder(i_encoder)
-    sm_encoder.save("../data/model/models/MDN_S2D_RB_Joint_1_ckp_160_Enet_libtorch.pt")
-    sm_pnet.save("../data/model/models/MDN_S2D_RB_Joint_1_ckp_160_Pnet_libtorch.pt")
+    # print("MDN Three Link Joint")
+    # encoder = PtNet(dim=3)
+    # pnet = GMPN_S2D_CLOUD_MDN_Pnet(input_size=34, output_size=3, mixture_num=20)
+    # checkpoint_load_file = "../data/model/models/MDN_C3D_Point_Joint_1_ckp_298.pt"
+    # checkpoint = torch.load(checkpoint_load_file)
+    # encoder.load_state_dict(checkpoint['Enet_state_dict'])
+    # pnet.load_state_dict(checkpoint['Pnet_state_dict'])
+    # sm_encoder = torch.jit.script(encoder)
+    # sm_pnet = torch.jit.script(pnet)
+    # # i_encoder = torch.rand(1, 2800)
+    # # o = sm_encoder(i_encoder)
+    # sm_encoder.save("../data/model/models/MDN_C3D_Point_Joint_1_ckp_298_Enet_libtorch.pt")
+    # sm_pnet.save("../data/model/models/MDN_C3D_Point_Joint_1_ckp_298_Pnet_libtorch.pt")
 
     # print("MDN")
     # mdn = GMPN_S2D_CLOUD_MDN_Pnet(input_size=42, output_size=7, mixture_num=20)
@@ -175,8 +175,7 @@ def get_libtorch_model():
     # sm_mdn.save("../data/model/models/MDN_ARM_1_ckp_1300_libtorch.pt")
     #
     # mdn = GMPN_S2D_CLOUD_MDN_Pnet(input_size=42, output_size=7, mixture_num=20)
-
-    # checkpoint_load_file = "../data/model/models/MDN_ARM_2_checkpoint_epoch_1000.pt"
+    # checkpoint_load_file = "../data/model/models/MDN_ARM_RRTS_1_ckp_2000.pt"
     # checkpoint = torch.load(checkpoint_load_file)
     # mdn.load_state_dict(checkpoint['model_state_dict'])
     # sm_mdn = torch.jit.script(mdn)
@@ -186,7 +185,7 @@ def get_libtorch_model():
     # # o_mdn = sm_mdn(i_mdn_x_e, i_mdn_x_c, i_mdn_x_g)
     # # for i in o_mdn:
     # #     print(i.shape)
-    # sm_mdn.save("../data/model/models/MDN_ARM_2_ckp_1000_libtorch.pt")
+    # sm_mdn.save("../data/model/models/MDN_ARM_RRTS_1_ckp_2000_libtorch.pt")
 
     # mdn = GMPN_S2D_CLOUD_MDN_Pnet(input_size=36, output_size=4, mixture_num=20)
     #
@@ -216,18 +215,18 @@ def get_libtorch_model():
     # # #     print(i.shape)
     # sm_mpn.save("../data/model/models/MPN_ARM_1_ckp_500_libtorch.pt")
 
-    # mpn = S2D_MDN_Pnet(42, 7)
-    # checkpoint_load_file = "../data/model/models/MPN_ARM_3_checkpoint_epoch_100.pt"
-    # checkpoint = torch.load(checkpoint_load_file)
-    # mpn.load_state_dict(checkpoint['model_state_dict'])
-    # sm_mpn = torch.jit.script(mpn)
-    # # # i_mpn_x_e = torch.rand(1, 28)
-    # # # i_mpn_x_c = torch.rand(1, 2)
-    # # # i_mpn_x_g = torch.rand(1, 2)
-    # # # o_mpn = sm_mpn(i_mpn_x_e, i_mpn_x_c, i_mpn_x_g)
-    # # # for i in o_mpn:
-    # # #     print(i.shape)
-    # sm_mpn.save("../data/model/models/MPN_ARM_3_ckp_100_libtorch.pt")
+    mpn = S2D_MDN_Pnet(32, 2)
+    checkpoint_load_file = "../data/model/models/MPN_S2D_Pt_ori_ckp_120.pt"
+    checkpoint = torch.load(checkpoint_load_file)
+    mpn.load_state_dict(checkpoint['model_state_dict'])
+    sm_mpn = torch.jit.script(mpn)
+    # # i_mpn_x_e = torch.rand(1, 28)
+    # # i_mpn_x_c = torch.rand(1, 2)
+    # # i_mpn_x_g = torch.rand(1, 2)
+    # # o_mpn = sm_mpn(i_mpn_x_e, i_mpn_x_c, i_mpn_x_g)
+    # # for i in o_mpn:
+    # #     print(i.shape)
+    sm_mpn.save("../data/model/models/MPN_S2D_Pt_ori_ckp_120_libtorch.pt")
 
 
     # mpn = S2D_MDN_Pnet(36, 4)
@@ -446,13 +445,13 @@ if __name__ == '__main__':
     # test()
     # cat_paths()
     # change_cloud_dim()
-    S2D_get_Joint_Train_data()
+    # S2D_get_Joint_Train_data()
     # Panda_arm_get_Train_data_single_env()
     # divide_cloud_to_train_test()
     # make_cloud_random()
     # divide_cloud()
     # divide_s2d_cloud()
-    # get_libtorch_model()
+    get_libtorch_model()
     # make_cloud_random()
 
     # divide_cloud_to_train_test()
