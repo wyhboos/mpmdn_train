@@ -35,7 +35,7 @@ def Train_loop_mdn(model, optimizer, train_dataset, batch_size, device):
         x_env, x_cur_pos, x_goal_pos, y = x_env.to(device), x_cur_pos.to(device), x_goal_pos.to(device), y.to(
             device)
         alpha, sigma, mean = model(x_env, x_cur_pos, x_goal_pos)
-        loss, NLL_loss, sigma_loss = model.MDN_loss(alpha, sigma, mean, output_size=2, target=y)
+        loss, NLL_loss, sigma_loss = model.MDN_loss(alpha, sigma, mean, target=y)
         train_loss += loss.data
         loss.backward()
         # total_norm = torch.nn.utils.clip_grad_norm_(parameters=model.parameters(), max_norm=0.1, norm_type=2)
@@ -67,7 +67,7 @@ def Train_loop_mdn_Joint_train(Enet, Pnet, optimizer, train_dataset, cloud_data,
             device)
         x_env = Enet(x_cloud)
         alpha, sigma, mean = Pnet(x_env, x_cur_pos, x_goal_pos)
-        loss, NLL_loss, sigma_loss = Pnet.MDN_loss(alpha, sigma, mean, output_size=2, target=y)
+        loss, NLL_loss, sigma_loss = Pnet.MDN_loss(alpha, sigma, mean, target=y)
         train_loss += loss.data
         loss.backward()
         # total_norm = torch.nn.utils.clip_grad_norm_(parameters=model.parameters(), max_norm=0.1, norm_type=2)
@@ -142,7 +142,7 @@ def test_loop_mdn(model, test_dataset, batch_size, device):
             x_env, x_cur_pos, x_goal_pos, y = x_env.to(device), x_cur_pos.to(device), x_goal_pos.to(device), y.to(
                 device)
             alpha, sigma, mean = model(x_env, x_cur_pos, x_goal_pos)
-            loss, NLL_loss, sigma_loss = model.MDN_loss(alpha, sigma, mean, output_size=2, target=y)
+            loss, NLL_loss, sigma_loss = model.MDN_loss(alpha, sigma, mean, target=y)
             test_loss += loss.data
     return test_loss
 
@@ -168,7 +168,7 @@ def test_loop_mdn_Joint_test(Enet, Pnet, test_dataset, cloud_data, batch_size, d
                 device)
             x_env = Enet(x_cloud)
             alpha, sigma, mean = Pnet(x_env, x_cur_pos, x_goal_pos)
-            loss, NLL_loss, sigma_loss = Pnet.MDN_loss(alpha, sigma, mean, output_size=2, target=y)
+            loss, NLL_loss, sigma_loss = Pnet.MDN_loss(alpha, sigma, mean, target=y)
             test_loss += loss.data
     return test_loss
 
@@ -239,7 +239,7 @@ def vis_output_for_Cloud_input(obs_cloud, model, vis_dataset, save_fig_path, dev
             index_ = index.detach().numpy()
             for i in range(vis_batch_size):
                 vis_loss, vis_NLL_loss, vis_sigma_loss = model.MDN_loss(alpha[i:i + 1], sigma[i:i + 1],
-                                                                        mean[i:i + 1], output_size=2, target=y[i:i + 1])
+                                                                        mean[i:i + 1], target=y[i:i + 1])
                 vis_loss_ = vis_loss.cpu().detach().numpy()
                 index_i = int(index_[i])
                 env_i = obs_cloud[index_i]

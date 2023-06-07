@@ -936,7 +936,7 @@ class GMPN_S2D_CLOUD_MDN_Pnet(nn.Module):
 
 
 
-    def compute_Gaussian_probability(self, alpha, sigma, mean, output_size, target):
+    def compute_Gaussian_probability(self, alpha, sigma, mean, target):
         """
         Compute Gaussian distribution probability for a batch of data!
         input:
@@ -947,6 +947,7 @@ class GMPN_S2D_CLOUD_MDN_Pnet(nn.Module):
         output:
             prob_each_sample: each sample probability of the target, size: (batch size)
         """
+        output_size = self.output_size
         const = 1 / math.pow(2 * math.pi, (0.5 * output_size))
         target = torch.unsqueeze(target, dim=1).expand_as(
             mean)  # target size is shaped as (batch size x mixture_num x output_size)
@@ -962,13 +963,13 @@ class GMPN_S2D_CLOUD_MDN_Pnet(nn.Module):
 
         return prob_each_sample, prob_each_gaussian, prob_each_gaussian_no_prior, log_prob
 
-    def MDN_loss(self, alpha, sigma, mean, output_size, target):
+    def MDN_loss(self, alpha, sigma, mean, target):
         """
         Compute negative log maximum likelihood as loss function!
         attention: we compute it by batch!
         """
         prob_each_sample, prob_each_gaussian, prob_each_gaussian_no_prior, log_prob = self.compute_Gaussian_probability(
-            alpha, sigma, mean, output_size, target)
+            alpha, sigma, mean, target)
 
         log_sum_exp = -torch.logsumexp(log_prob, dim=1)
 
