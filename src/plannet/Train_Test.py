@@ -3421,9 +3421,9 @@ def Train_Eval_Cloud_input_Pt_MPN_main():
     epoch_start = 0
     epoch_end = 5000
 
-    train_data_load_file = "../../data/train/s2d/S2D_Point_train.npy"
+    train_data_load_file = "../../data/train/s2d/1000env_400pt/S2D_Point_train.npy"
     # train_env_test_data_load_file = "../../../output/data/S2D/MPN_S2D_train_env_test_82k.npy"
-    new_env_test_data_load_file = "../../data/train/s2d/S2D_Point_test.npy"
+    new_env_test_data_load_file = "../../data/train/s2d/1000env_400pt/S2D_Point_test.npy"
 
     model_name = "MPN_S2D_Point_1"
     model_dir = "../../data/model/" + model_name + '/'
@@ -3554,12 +3554,14 @@ if __name__ == '__main__':
     # Train_Eval_Cloud_input_S2D_TwoL_MDN_PtNet_Joint_main()
     # Train_Eval_Cloud_input_S2D_TwoL_MPN_PtNet_Joint_main()
 
-    # Train_Eval_Cloud_input_C3D_Point_MDN_PtNet_Joint_main()
+    Train_Eval_Cloud_input_C3D_Point_MDN_PtNet_Joint_main()
     # Train_Eval_Cloud_input_C3D_Point_MPN_PtNet_Joint_main()
 
-    Train_Eval_Cloud_input_Arm_MDN_main()
+    # Train_Eval_Cloud_input_Arm_MDN_main()
     # Train_Eval_Cloud_input_Arm_MPN_main()
 
     # Train_Eval_Cloud_input_S2D_Pt_MDN_PtNet_Joint_main()
+
+    # Train_Eval_Cloud_input_Pt_MPN_main()
 
 
