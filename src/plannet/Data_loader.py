@@ -210,7 +210,7 @@ class GMPNDataset_Arm(Dataset):
         return len(self.y)
 
     def __getitem__(self, item):
-        return self.x_env[item], self.x_cur_pos[item], self.x_goal_pos[item], self.y[item], self.index[item]
+        return self.x_cur_pos[item], self.x_goal_pos[item], self.y[item], self.index[item]
 
 
 class CloudDataset(Dataset):
