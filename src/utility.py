@@ -148,7 +148,7 @@ def get_libtorch_model():
     # print("MDN Three Link Joint")
     # encoder = PtNet(dim=3)
     # pnet = GMPN_S2D_CLOUD_MDN_Pnet(input_size=34, output_size=3, mixture_num=20)
-    # checkpoint_load_file = "../data/model/models/MDN_C3D_Point_Joint_1_ckp_298.pt"
+    # checkpoint_load_file = "../data/model/models/MDN_C3D_Point_Joint_2_debug_ckp_200.pt"
     # checkpoint = torch.load(checkpoint_load_file)
     # encoder.load_state_dict(checkpoint['Enet_state_dict'])
     # pnet.load_state_dict(checkpoint['Pnet_state_dict'])
@@ -156,8 +156,8 @@ def get_libtorch_model():
     # sm_pnet = torch.jit.script(pnet)
     # # i_encoder = torch.rand(1, 2800)
     # # o = sm_encoder(i_encoder)
-    # sm_encoder.save("../data/model/models/MDN_C3D_Point_Joint_1_ckp_298_Enet_libtorch.pt")
-    # sm_pnet.save("../data/model/models/MDN_C3D_Point_Joint_1_ckp_298_Pnet_libtorch.pt")
+    # sm_encoder.save("../data/model/models/MDN_C3D_Point_Joint_2_debug_ckp_200_Enet_libtorch.pt")
+    # sm_pnet.save("../data/model/models/MDN_C3D_Point_Joint_2_debug_ckp_200_Pnet_libtorch.pt")
 
     # print("MDN")
     # mdn = GMPN_S2D_CLOUD_MDN_Pnet(input_size=42, output_size=7, mixture_num=20)
@@ -174,8 +174,8 @@ def get_libtorch_model():
     # #     print(i.shape)
     # sm_mdn.save("../data/model/models/MDN_ARM_1_ckp_1300_libtorch.pt")
     #
-    # mdn = GMPN_S2D_CLOUD_MDN_Pnet(input_size=42, output_size=7, mixture_num=20)
-    # checkpoint_load_file = "../data/model/models/MDN_ARM_RRTS_1_ckp_2000.pt"
+    # mdn = GMPN_S2D_CLOUD_MDN_Pnet(input_size=42, output_size=7, mixture_num=40)
+    # checkpoint_load_file = "../data/model/models/MDN_ARM_TB_BITstar_MIX_50_1_ckp_520.pt"
     # checkpoint = torch.load(checkpoint_load_file)
     # mdn.load_state_dict(checkpoint['model_state_dict'])
     # sm_mdn = torch.jit.script(mdn)
@@ -185,7 +185,7 @@ def get_libtorch_model():
     # # o_mdn = sm_mdn(i_mdn_x_e, i_mdn_x_c, i_mdn_x_g)
     # # for i in o_mdn:
     # #     print(i.shape)
-    # sm_mdn.save("../data/model/models/MDN_ARM_RRTS_1_ckp_2000_libtorch.pt")
+    # sm_mdn.save("../data/model/models/MDN_ARM_TB_BITstar_MIX_50_1_ckp_520_libtorch.pt")
 
     # mdn = GMPN_S2D_CLOUD_MDN_Pnet(input_size=36, output_size=4, mixture_num=20)
     #
@@ -215,22 +215,8 @@ def get_libtorch_model():
     # # #     print(i.shape)
     # sm_mpn.save("../data/model/models/MPN_ARM_1_ckp_500_libtorch.pt")
 
-    mpn = S2D_MDN_Pnet(32, 2)
-    checkpoint_load_file = "../data/model/models/MPN_S2D_Pt_ori_ckp_120.pt"
-    checkpoint = torch.load(checkpoint_load_file)
-    mpn.load_state_dict(checkpoint['model_state_dict'])
-    sm_mpn = torch.jit.script(mpn)
-    # # i_mpn_x_e = torch.rand(1, 28)
-    # # i_mpn_x_c = torch.rand(1, 2)
-    # # i_mpn_x_g = torch.rand(1, 2)
-    # # o_mpn = sm_mpn(i_mpn_x_e, i_mpn_x_c, i_mpn_x_g)
-    # # for i in o_mpn:
-    # #     print(i.shape)
-    sm_mpn.save("../data/model/models/MPN_S2D_Pt_ori_ckp_120_libtorch.pt")
-
-
-    # mpn = S2D_MDN_Pnet(36, 4)
-    # checkpoint_load_file = "../data/model/models/MPN_S2D_TL_2_checkpoint_epoch_380.pt"
+    # mpn = S2D_MDN_Pnet(32, 2)
+    # checkpoint_load_file = "../data/model/models/MPN_S2D_Point_3_checkpoint_epoch_500.pt"
     # checkpoint = torch.load(checkpoint_load_file)
     # mpn.load_state_dict(checkpoint['model_state_dict'])
     # sm_mpn = torch.jit.script(mpn)
@@ -240,7 +226,21 @@ def get_libtorch_model():
     # # # o_mpn = sm_mpn(i_mpn_x_e, i_mpn_x_c, i_mpn_x_g)
     # # # for i in o_mpn:
     # # #     print(i.shape)
-    # sm_mpn.save("../data/model/models/MPN_S2D_TL_2_ckp_380.pt")
+    # sm_mpn.save("../data/model/models/MPN_S2D_Point_3_ckp_500_libtorch.pt")
+
+
+    mpn = S2D_MDN_Pnet(42, 7)
+    checkpoint_load_file = "../data/model/models/MPN_ARM_TB_BITstar_1_ckp_1000.pt"
+    checkpoint = torch.load(checkpoint_load_file)
+    mpn.load_state_dict(checkpoint['model_state_dict'])
+    sm_mpn = torch.jit.script(mpn)
+    # # i_mpn_x_e = torch.rand(1, 28)
+    # # i_mpn_x_c = torch.rand(1, 2)
+    # # i_mpn_x_g = torch.rand(1, 2)
+    # # o_mpn = sm_mpn(i_mpn_x_e, i_mpn_x_c, i_mpn_x_g)
+    # # for i in o_mpn:
+    # #     print(i.shape)
+    sm_mpn.save("../data/model/models/MPN_ARM_TB_BITstar_1_ckp_1000_libtorch.pt")
 
 def divide_s2d_cloud():
     cloud_file = "../data/train/s2d/obs_cloud_30000_2_1400_rd.npy"
@@ -275,9 +275,14 @@ def make_cloud_random():
     np.save("../data/train/c3d/c3d_obs_cloud_50000_random.npy", random_cloud_all)
 
 def S2D_get_Joint_Train_data():
+    """
+    since the cloud data is too big to pack into every train data point, we do not include the cloud data into the training data,
+    instead, we load the cloud data when training
+    :return:
+    """
     cloud_file = np.load("../data/train/c3d/c3d_obs_cloud_2000.npy")
     # paths = np.load("../../data/train/s2d/1000env_400pt/S2D_Three_Link_Path_all.npy", allow_pickle=True)
-    paths = np.load("../data/train/s2d/1000env_400pt/S2D_Point_Path_/S2D_Point_Path_all.npy", allow_pickle=True)
+    paths = np.load("../data/train/s2d/1000env_400pt/S2D_Two_Link_vec_Path_/S2D_Two_Link_vec_Path_all.npy", allow_pickle=True)
     train_data = []
     train_data_env = []
     train_data_current = []
@@ -339,15 +344,15 @@ def S2D_get_Joint_Train_data():
     print(test_data.shape)
     np.random.shuffle(test_data)
     np.random.shuffle(train_data)
-    np.save("../data/train/s2d/1000env_400pt/S2D_Point_Path_/S2D_Point_Joint_train.npy", train_data)
-    np.save("../data/train/s2d/1000env_400pt/S2D_Point_Path_/S2D_Point_Joint_test.npy", test_data)
+    np.save("../data/train/s2d/1000env_400pt/S2D_Two_Link_vec_Path_/S2D_Two_Link_vec_Joint_train.npy", train_data)
+    np.save("../data/train/s2d/1000env_400pt/S2D_Two_Link_vec_Path_/S2D_Two_Link_vec_Joint_test.npy", test_data)
 
 
-def Panda_arm_get_Train_data_single_env():
+def Panda_arm_get_Train_data_multiple_env():
     # cloud_file = np.load("../data/train/c3d/c3d_obs_cloud_2000.npy")
     # paths = np.load("../../data/train/s2d/1000env_400pt/S2D_Three_Link_Path_all.npy", allow_pickle=True)
-    paths = np.load("../data/train/panda_arm/path_usr_rrtstar_part_49999.npy", allow_pickle=True)
-    paths = [paths]
+    # paths = np.load("../data/train/panda_arm/path_usr_rrtstar_part_49999.npy", allow_pickle=True)
+    paths = np.load("../data/train/panda_arm/tb_BITs_env0_4_path_1000_data_aug.npy",allow_pickle=True)
     train_data = []
     train_data_env = []
     train_data_current = []
@@ -361,21 +366,21 @@ def Panda_arm_get_Train_data_single_env():
     test_data_target = []
     test_data_next = []
     test_env_index = []
-    for i in range(1):
+    for i in range(5):
         # print("i", i)
         env_latent_i = np.ones(28)
         # env_latent_i = env_latent_i.reshape(6000)
-        env_i_paths = paths[i]
+        env_i_paths = list(paths[i])
         for j in range(len(env_i_paths)):
-            env_i_path_j = env_i_paths[j]
+            env_i_path_j = list(env_i_paths[j])
             # l = env_i_path_j.shape[0]
             l = len(env_i_path_j)
-            print("i,j,l", i, j, l)
+            # print("i,j,l", i, j, l)
             for k in range(l - 1):
                 target = env_i_path_j[l - 1]
                 current = env_i_path_j[k]
                 next = env_i_path_j[k + 1]
-                if j < 32000:
+                if j < 100000:
                     train_data_env.append(env_latent_i)
                     train_data_current.append(current)
                     train_data_target.append(target)
@@ -395,7 +400,7 @@ def Panda_arm_get_Train_data_single_env():
     train_env_index = np.array(train_env_index, dtype=np.float32)
     train_env_index = train_env_index.reshape(-1, 1)
 
-    train_data = np.concatenate((train_data_env, train_data_current, train_data_target, train_data_next, train_env_index), axis=1)
+    train_data = np.concatenate((train_data_current, train_data_target, train_data_next, train_env_index), axis=1)
     print(train_data.shape)
 
     test_data_env = np.array(test_data_env, dtype=np.float32)
@@ -405,12 +410,14 @@ def Panda_arm_get_Train_data_single_env():
     test_env_index = np.array(test_env_index, dtype=np.float32)
     test_env_index = test_env_index.reshape(-1, 1)
     test_data = np.concatenate(
-        (test_data_env, test_data_current, test_data_target, test_data_next, test_env_index), axis=1)
+        (test_data_current, test_data_target, test_data_next, test_env_index), axis=1)
     print(test_data.shape)
     np.random.shuffle(test_data)
     np.random.shuffle(train_data)
-    np.save("../data/train/panda_arm/Arm_RRTs_32000_train.npy", train_data)
-    np.save("../data/train/panda_arm/Arm_RRTs_8000_test.npy", test_data)
+    # np.save("../data/train/panda_arm/Arm_RRTs_32000_train.npy", train_data)
+    # np.save("../data/train/panda_arm/Arm_RRTs_8000_test.npy", test_data)
+    np.save("../data/train/panda_arm/tb_BITs_env0_4_path_1000_data_aug_train.npy", train_data)
+    np.save("../data/train/panda_arm/tb_BITs_env0_4_path_1000_data_aug_test.npy", test_data)
 def change_cloud_dim():
     cloud_file = np.load("../data/train/c3d/c3d_obs_cloud_50000_random.npy")
     # print(cloud_file[0:1, 0:14])
@@ -425,13 +432,33 @@ def change_cloud_dim():
     np.save("../data/train/c3d/c3d_obs_cloud_2000_3_2000_rd.npy", cloud_file_dim_tran[:2000, :, :])
 
 def cat_paths():
-    file = "../data/train/s2d/1000env_400pt/S2D_Point_Path_/S2D_Point_Path_"
+    # file = "../data/train/s2d/1000env_400pt/S2D_Point_Path_/S2D_Point_Path_"
+    file = "../data/train/s2d/1000env_400pt/S2D_Two_Link_vec_Path_/S2D_Two_Link_vec_Path_"
+    file = "../data/train/panda_arm/table_case_BITs/table_case_BITs.npythread_"
+
+
     path_r = []
     for i in range(20):
         file_i = np.load(file+str(i)+".npy", allow_pickle=True)
         path_r += list(file_i)
     print(len(path_r))
-    np.save("../data/train/s2d/1000env_400pt/S2D_Point_Path_/S2D_Point_Path_all.npy", np.array(path_r))
+    np.save("../data/train/panda_arm/table_case_BITs/table_case_BITs_path_all.npy", np.array(path_r))
+
+def cat_paths_arm():
+    # file = "../data/train/s2d/1000env_400pt/S2D_Point_Path_/S2D_Point_Path_"
+    file = "../data/train/s2d/1000env_400pt/S2D_Two_Link_vec_Path_/S2D_Two_Link_vec_Path_"
+    file = "../data/train/panda_arm/table_case_BITs/table_case_BITs.npythread_"
+    path_r = []
+    for i in range(4):
+        env_i = []
+        for j in range(i*5, (i+1)*5):
+            path_i_j = np.load(file + str(j) + ".npy", allow_pickle=True)
+            print(len(list(path_i_j)))
+            env_i += list(path_i_j)
+        print(len(env_i))
+        path_r.append(env_i)
+    print(len(path_r))
+    np.save("../data/train/panda_arm/table_case_BITs/table_case_BITs_path_all.npy", np.array(path_r))
 
 
 def test():
@@ -441,9 +468,71 @@ def test():
     b = a[index_l, :]
     print(b)
 
+def arm_tb_add_env0_data():
+    env1_4 = list(np.load("../data/train/panda_arm/table_case_BITs/table_case_BITs_path_all.npy", allow_pickle=True))
+    env0 = list(np.load("../data/train/panda_arm/table_case0_BITstar_2000_path/table_case0_BITstar_path_2000.npy", allow_pickle=True))
+    print((len(env1_4)))
+    print(len(env0))
+    env0_4 = [env0[:1000]] + env1_4
+    print(len(env0_4))
+    for i in range(5):
+        print(len(env0_4[i]))
+    np.save("../data/train/panda_arm/tb_BITs_env0_4_path_1000.npy", np.array(env0_4))
+
+def data_augment_for_path(path):
+    """
+    for path with more than 2 node, each node can be goal
+    :param path:
+    :return:
+    """
+    l = len(path)
+    if l <= 2:
+        return path
+    aug_path = []
+    for i in range(1, l):
+        path_i = [path[index] for index in range(0, i+1)]
+        aug_path.append(path_i)
+    return aug_path
+
+def path_reverse(path):
+    l = len(path)
+    return [path[l-i-1] for i in range(0, l)]
+
+def arm_path_augment_with_reverse():
+    env_path_all = list(np.load("../data/train/panda_arm/tb_BITs_env0_4_path_1000.npy", allow_pickle=True))
+    env_path_all_aug = []
+    for i in range(len(env_path_all)):
+        env_i_paths = list(env_path_all[i])
+        env_i_path_aug = []
+        for j in range(len(env_i_paths)):
+            env_i_path_j = list(env_i_paths[j])
+            path_aug = data_augment_for_path(env_i_path_j) + data_augment_for_path((path_reverse(env_i_path_j)))
+            env_i_path_aug += path_aug
+        print(len(env_i_path_aug))
+        env_path_all_aug.append(env_i_path_aug)
+    print(len(env_path_all_aug))
+    np.save("../data/train/panda_arm/tb_BITs_env0_4_path_1000_data_aug.npy", np.array(env_path_all_aug))
+
+def get_train_test_data():
+    data = np.load("../data/train/panda_arm/tb_BITs_env0_4_path_1000_data_aug_40k.npy")
+    print((data.shape))
+    np.random.shuffle(data)
+    l = data.shape[0]
+    train_data = data[:int(0.8*l), :]
+    print((train_data.shape))
+    test_data = data[int(0.8*l):, :]
+    print(test_data.shape)
+    np.save("../data/train/panda_arm/tb_BITs_env0_4_path_1000_data_aug_32k_train.npy", train_data)
+    np.save("../data/train/panda_arm/tb_BITs_env0_4_path_1000_data_aug_8k_train.npy", test_data)
+
 if __name__ == '__main__':
+    get_train_test_data()
+    # arm_path_augment_with_reverse()
     # test()
+    # Panda_arm_get_Train_data_multiple_env()
     # cat_paths()
+    # arm_tb_add_env0_data()
+    # cat_paths_arm()
     # change_cloud_dim()
     # S2D_get_Joint_Train_data()
     # Panda_arm_get_Train_data_single_env()
@@ -451,7 +540,7 @@ if __name__ == '__main__':
     # make_cloud_random()
     # divide_cloud()
     # divide_s2d_cloud()
-    get_libtorch_model()
+    # get_libtorch_model()
     # make_cloud_random()
 
     # divide_cloud_to_train_test()
