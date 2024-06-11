@@ -1004,3 +1004,8 @@ class S2D_MDN_Pnet(nn.Module):
         x = torch.cat([x_env, x_cur_pos, x_goal_pos], dim=1)
         out = self.fc(x)
         return out
+
+if __name__ == '__main__':
+    model = S2D_MDN_Pnet(input_size=32, output_size=2)
+    total_num = sum(p.numel() for p in model.parameters())
+    print(total_num)
