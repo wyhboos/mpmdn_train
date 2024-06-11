@@ -70,7 +70,7 @@ def Train_loop_mdn_Joint_train(Enet, Pnet, optimizer, train_dataset, cloud_data,
         loss, NLL_loss, sigma_loss = Pnet.MDN_loss(alpha, sigma, mean, target=y)
         train_loss += loss.data
         loss.backward()
-        # total_norm = torch.nn.utils.clip_grad_norm_(parameters=model.parameters(), max_norm=0.1, norm_type=2)
+        # total_norm = torch.nn.utils.clip_grad_norm_(parameters=Enet.parameters(), max_norm=0.05, norm_type=2)
         optimizer.step()
         optimizer.zero_grad()
     return train_loss
@@ -193,7 +193,7 @@ def test_loop_mpn(model, test_dataset, batch_size, device, criterion):
 
 def test_loop_mpn_Joint_test(Pnet, Enet, test_dataset, cloud_data, batch_size, device, criterion):
     Enet.eval()
-    Pnet.eval()
+    Pnet.train()
     if device == 'cuda':
         Enet.cuda()
         Pnet.cuda()
@@ -1746,11 +1746,11 @@ def Train_Eval_Cloud_input_S2D_ThreeL_MDN_PtNet_Joint_main():
     epoch_start = 0
     epoch_end = 5000
 
-    train_data_load_file = "../../data/train/s2d/1000env_400pt/S2D_Three_Link_Joint_train.npy"
+    train_data_load_file = "../../data/train/s2d/1000env_400pt/S2D_Three_Link_vec_Joint_train.npy"
     cloud_file = "../../data/train/s2d/obs_cloud_30000_2_1400_rd.npy"
     # train_env_test_data_load_file = "../../../output/data/S2D/MPN_S2D_train_env_test_82k.npy"
-    new_env_test_data_load_file = "../../data/train/s2d/1000env_400pt/S2D_Three_Link_Joint_test.npy"
-    model_name = "MDN_S2D_ThreeL_Joint_2_debug"
+    new_env_test_data_load_file = "../../data/train/s2d/1000env_400pt/S2D_Three_Link_vec_Joint_test.npy"
+    model_name = "MDN_S2D_ThreeL_vec_Joint_1"
     model_dir = "../../data/model/" + model_name + '/'
     load_checkpoint_flag = False
     checkpoint_load_file = '../../../output/model/GMPN_S2D_CLOUD_MDN_6/checkpoint_save/checkpoint_epoch_340.pt'
@@ -2011,17 +2011,17 @@ def Train_Eval_Cloud_input_ARM_MDN_PtNet_Joint_main():
     # parm set
     device = 'cuda'
 
-    mixture_num = 40
-    lr = 3 * 1e-4
+    mixture_num = 20
+    lr = 0.5*1e-4
     weight_decay = 0
     epoch_start = 0
     epoch_end = 2000
 
-    train_data_load_file = "../../data/train/panda_arm/tb_BITs_env0_4_path_1000_data_aug_32k_train.npy"
-    cloud_file = "../../data/train/panda_arm/tb_env_clouds_100_3_500_surface.npy"
+    train_data_load_file = "../../data/train/panda_arm/box_scene_env_0_5_Joint_train.npy"
+    cloud_file = "../../data/train/panda_arm/random_box_scence_clouds_500_surface.npy"
     # train_env_test_data_load_file = "../../../output/data/S2D/MPN_S2D_train_env_test_82k.npy"
-    new_env_test_data_load_file = "../../data/train/panda_arm/tb_BITs_env0_4_path_1000_data_aug_8k_test.npy"
-    model_name = "MDN_ARM_tb_Joint_1"
+    new_env_test_data_load_file = "../../data/train/panda_arm/box_scene_env_0_5_Joint_test.npy"
+    model_name = "MDN_ARM_rdbox_1"
     model_dir = "../../data/model/" + model_name + '/'
     load_checkpoint_flag = False
     checkpoint_load_file = '../../../output/model/GMPN_S2D_CLOUD_MDN_6/checkpoint_save/checkpoint_epoch_340.pt'
@@ -2047,15 +2047,15 @@ def Train_Eval_Cloud_input_ARM_MDN_PtNet_Joint_main():
     tensorboard_dir = model_dir + '/exp1'
     writer = SummaryWriter(tensorboard_dir)
 
-    train_batch_size = 512
+    train_batch_size = 1024
     train_env_test_batch_size = 8192
-    new_env_test_batch_size = 512
+    new_env_test_batch_size = 1024
     env_info_length = 0
     train_data_vis_cnt = 30
     train_env_test_data_vis_cnt = 30
     new_env_test_data_vis_cnt = 30
 
-    checkpoint_save_interval = 1
+    checkpoint_save_interval = 5
     vis_fig_save_interval = 10
 
     # load dataset
@@ -3035,7 +3035,7 @@ def Train_Eval_Cloud_input_S2D_TwoL_MPN_PtNet_Joint_main():
     cloud_file = "../../data/train/s2d/obs_cloud_30000_2_1400_rd.npy"
     new_env_test_data_load_file = "../../data/train/s2d/1000env_400pt/S2D_Two_Link_vec_Joint_test.npy"
 
-    model_name = "MPN_S2D_TwoL_vec_Joint_1"
+    model_name = "MPN_S2D_TwoL_vec_Joint_1_train_mode"
     model_dir = "../../data/model/" + model_name + '/'
     load_checkpoint_flag = False
     checkpoint_load_file = '../../../output/model/GMPN_S2D_CLOUD_MDN_6/checkpoint_save/checkpoint_epoch_340.pt'
@@ -3061,15 +3061,15 @@ def Train_Eval_Cloud_input_S2D_TwoL_MPN_PtNet_Joint_main():
     tensorboard_dir = model_dir + '/exp1'
     writer = SummaryWriter(tensorboard_dir)
 
-    train_batch_size = 356
+    train_batch_size = 640
     train_env_test_batch_size = 8192
-    new_env_test_batch_size = 356
+    new_env_test_batch_size = 640
     env_info_length = 0
     train_data_vis_cnt = 30
     train_env_test_data_vis_cnt = 30
     new_env_test_data_vis_cnt = 30
 
-    checkpoint_save_interval = 2
+    checkpoint_save_interval = 1
     vis_fig_save_interval = 10
 
     # load dataset
@@ -3166,11 +3166,11 @@ def Train_Eval_Cloud_input_S2D_ThreeL_MPN_PtNet_Joint_main():
     epoch_start = 0
     epoch_end = 5000
 
-    train_data_load_file = "../../data/train/s2d/1000env_400pt/S2D_Three_Link_Joint_train.npy"
+    train_data_load_file = "../../data/train/s2d/1000env_400pt/S2D_Three_Link_vec_Joint_train.npy"
     cloud_file = "../../data/train/s2d/obs_cloud_30000_2_1400_rd.npy"
-    new_env_test_data_load_file = "../../data/train/s2d/1000env_400pt/S2D_Three_Link_Joint_test.npy"
+    new_env_test_data_load_file = "../../data/train/s2d/1000env_400pt/S2D_Three_Link_vec_Joint_test.npy"
 
-    model_name = "MPN_S2D_ThreeL_Joint_1"
+    model_name = "MPN_S2D_ThreeL_vec_Joint_1"
     model_dir = "../../data/model/" + model_name + '/'
     load_checkpoint_flag = False
     checkpoint_load_file = '../../../output/model/GMPN_S2D_CLOUD_MDN_6/checkpoint_save/checkpoint_epoch_340.pt'
@@ -3196,9 +3196,9 @@ def Train_Eval_Cloud_input_S2D_ThreeL_MPN_PtNet_Joint_main():
     tensorboard_dir = model_dir + '/exp1'
     writer = SummaryWriter(tensorboard_dir)
 
-    train_batch_size = 128
+    train_batch_size = 256
     train_env_test_batch_size = 8192
-    new_env_test_batch_size = 128
+    new_env_test_batch_size = 256
     env_info_length = 0
     train_data_vis_cnt = 30
     train_env_test_data_vis_cnt = 30
@@ -3436,11 +3436,11 @@ def Train_Eval_Cloud_input_ARM_MPN_PtNet_Joint_main():
     epoch_start = 0
     epoch_end = 2000
 
-    train_data_load_file = "../../data/train/panda_arm/tb_BITs_env0_4_path_1000_data_aug_32k_train.npy"
-    cloud_file = "../../data/train/panda_arm/tb_env_clouds_100_3_500_surface.npy"
-    new_env_test_data_load_file = "../../data/train/panda_arm/tb_BITs_env0_4_path_1000_data_aug_8k_test.npy"
-
-    model_name = "MPN_ARM_tb_Joint_1"
+    train_data_load_file = "../../data/train/panda_arm/box_scene_env_0_5_Joint_train.npy"
+    cloud_file = "../../data/train/panda_arm/random_box_scence_clouds_500_surface.npy"
+    # train_env_test_data_load_file = "../../../output/data/S2D/MPN_S2D_train_env_test_82k.npy"
+    new_env_test_data_load_file = "../../data/train/panda_arm/box_scene_env_0_5_Joint_test.npy"
+    model_name = "MPN_ARM_rdbox_1_0317test"
     model_dir = "../../data/model/" + model_name + '/'
     load_checkpoint_flag = False
     checkpoint_load_file = '../../../output/model/GMPN_S2D_CLOUD_MDN_6/checkpoint_save/checkpoint_epoch_340.pt'
@@ -3466,15 +3466,15 @@ def Train_Eval_Cloud_input_ARM_MPN_PtNet_Joint_main():
     tensorboard_dir = model_dir + '/exp1'
     writer = SummaryWriter(tensorboard_dir)
 
-    train_batch_size = 512
+    train_batch_size = 1024
     train_env_test_batch_size = 8192
-    new_env_test_batch_size = 512
+    new_env_test_batch_size = 1024
     env_info_length = 0
     train_data_vis_cnt = 30
     train_env_test_data_vis_cnt = 30
     new_env_test_data_vis_cnt = 30
 
-    checkpoint_save_interval = 20
+    checkpoint_save_interval = 5
     vis_fig_save_interval = 10
 
     # load dataset
